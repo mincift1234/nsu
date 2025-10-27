@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>분실물 찾기 — 다크 테마</title>
+
+        <!-- 폰트 & CSS -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap"
+            rel="stylesheet" />
+        <link rel="stylesheet" href="styles.css" />
+        <meta name="description" content="학교 분실물 찾기 — HTML/CSS/JS + Firebase" />
+    </head>
+    <body>
+        <!-- Top header -->
+        <header class="topbar">
+            <div class="top-inner">
+                <button class="icon-btn hamburger" aria-label="메뉴 열기">
+                    <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="20" height="2" rx="1" fill="#bbb" />
+                        <rect y="6" width="20" height="2" rx="1" fill="#bbb" />
+                        <rect y="12" width="20" height="2" rx="1" fill="#bbb" />
+                    </svg>
+                </button>
+
+                <a class="brand" href="#">
+                    <img src="https://via.placeholder.com/28x28/ff7a00/ffffff?text=ㅁ" alt="로고" class="brand-logo" />
+                    <span class="brand-text">잃어버림</span>
+                </a>
+
+                <!-- 검색 -->
+                <div class="search-box">
+                    <form class="search-form" id="searchForm" action="#" role="search" aria-label="검색">
+                        <input
+                            id="searchInput"
+                            type="search"
+                            placeholder="무엇을 찾으시나요? (예: 우산, 지갑)"
+                            aria-label="검색 입력" />
+                        <button class="icon-btn search-btn" type="submit" aria-label="검색">
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M21 21l-4.35-4.35"
+                                    stroke="#fff"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <circle
+                                    cx="11"
+                                    cy="11"
+                                    r="6"
+                                    stroke="#fff"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 로그인/프로필/등록 -->
+                <div id="authArea">
+                    <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
+                    <img id="userAvatar" alt="" referrerpolicy="no-referrer" style="display: none" />
+
+                    <!-- 프로필 드롭다운 메뉴 -->
+                    <div id="profileMenu" class="hidden" aria-hidden="true">
+                        <ul>
+                            <li id="profile-info">내 정보</li>
+                            <li id="profile-logout">로그아웃</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 등록(플로팅 원형 버튼 스타일) -->
+                <button id="addBtn" class="add-btn" aria-label="등록" title="등록">
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"></path>
+                        <path
+                            d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Category chips (horizontal scroll) -->
+        <nav class="category-bar" aria-label="카테고리">
+            <ul class="category-list" id="categoryList">
+                <li><button class="chip active" data-cat="전체">전체</button></li>
+                <li><button class="chip" data-cat="지갑">지갑</button></li>
+                <li><button class="chip" data-cat="가방">가방</button></li>
+                <li><button class="chip" data-cat="의류">의류</button></li>
+                <li><button class="chip" data-cat="전자기기">전자기기</button></li>
+                <li><button class="chip" data-cat="문서/증명">문서/증명</button></li>
+                <li><button class="chip" data-cat="악세서리">악세서리</button></li>
+                <li><button class="chip" data-cat="기타">기타</button></li>
+            </ul>
+        </nav>
+
+        <!-- Main content -->
+        <main class="container">
+            <section class="hero">
+                <p class="hero-text">학교 분실물, 빠르게 찾아드려요 — 사진과 위치만 등록해주세요.</p>
+            </section>
+
+            <section class="listings" aria-label="분실물 목록" id="listings">
+                <!-- JS가 Firestore에서 불러와 카드로 렌더 -->
+            </section>
+        </main>
+
+        <!-- accessibility skip link -->
+        <a class="skip-link" href="#content">본문으로 건너뛰기</a>
+
+        <!-- Firebase + App -->
+        <script type="module" src="script.js"></script>
+    </body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>분실물 등록 — 잃어버림</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="register-style.css" />
+  </head>
+  <body>
+    <!-- 상단바: 메인과 동일 -->
+    <header class="topbar">
+      <div class="top-inner">
+        <a class="brand" href="index.html">
+          <img src="https://via.placeholder.com/28x28/ff7a00/ffffff?text=ㅁ" alt="로고" class="brand-logo" />
+          <span class="brand-text">잃어버림</span>
+        </a>
+        <h2 class="page-heading">분실물 등록</h2>
+      </div>
+    </header>
+
+    <!-- 본문 -->
+    <main class="container container--narrow">
+      <section class="card form-card" aria-label="분실물 등록 폼">
+        <form id="regForm" class="form">
+          <div class="form-grid">
+            <!-- 제목 -->
+            <div class="form-group">
+              <label class="label" for="title"><span class="label-title">제목</span></label>
+              <input class="input" type="text" id="title" required placeholder="예) 파란 우산" />
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="form-group">
+              <label class="label" for="category"><span class="label-title">카테고리</span></label>
+              <select class="select" id="category" required>
+                <option value="">선택</option>
+                <option>지갑</option>
+                <option>가방</option>
+                <option>의류</option>
+                <option>전자기기</option>
+                <option>문서/증명</option>
+                <option>악세서리</option>
+                <option>기타</option>
+              </select>
+            </div>
+
+            <!-- 위치 -->
+            <div class="form-group">
+              <label class="label" for="location"><span class="label-title">위치</span></label>
+              <input class="input" type="text" id="location" placeholder="예) 도서관 앞" />
+            </div>
+
+            <!-- 분실 일시 -->
+            <div class="form-group">
+              <label class="label" for="lostAt"><span class="label-title">분실 날짜/시간</span></label>
+              <input class="input" type="datetime-local" id="lostAt" />
+            </div>
+
+            <!-- 설명 (가로 전체) -->
+            <div class="form-group form-group--full">
+              <label class="label" for="description"><span class="label-title">설명</span></label>
+              <textarea class="textarea" id="description" rows="4" placeholder="상세 설명을 적어주세요."></textarea>
+            </div>
+
+            <!-- 사진 업로드 (가로 전체) -->
+            <div class="form-group form-group--full">
+              <span class="label-title">사진 (최대 3장, 5MB 이하)</span>
+              <label class="file-drop">
+                <input id="images" class="file-input" type="file" accept="image/*" multiple />
+                <div class="file-drop__hint">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  </svg>
+                  이미지 추가하기
+                </div>
+              </label>
+              <div id="preview" class="preview"></div>
+            </div>
+
+            <!-- 가격/보상 문구 (가로 전체) -->
+            <div class="form-group form-group--full">
+              <label class="label" for="priceText"><span class="label-title">가격/보상 문구(선택)</span></label>
+              <input class="input" type="text" id="priceText" placeholder="예) 무료 / 보상 있음 / 연락 주세요" />
+            </div>
+          </div>
+
+          <!-- 액션 -->
+          <div class="form-actions">
+            <a href="index.html" class="chip chip--ghost">취소</a>
+            <button type="submit" class="btn primary">등록</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <!-- 고정 로그인 UI(메인과 동일) -->
+    <div id="authArea">
+      <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
+      <img id="userAvatar" alt="" referrerpolicy="no-referrer" style="display: none" />
+      <div id="profileMenu" class="hidden" aria-hidden="true">
+        <ul>
+          <li id="profile-info">내 정보</li>
+          <li id="profile-logout">로그아웃</li>
+        </ul>
+      </div>
+    </div>
+
+    <script type="module" src="register.js"></script>
+  </body>
+</html>
