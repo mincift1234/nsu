@@ -789,3 +789,19 @@ textarea.control {
     width: 100%;
     max-width: none; /* 카드 공통 max-width가 있다면 무시 */
 }
+
+.toggle-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.toggle-box input[type="checkbox"] {
+    accent-color: #ff7a00;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
