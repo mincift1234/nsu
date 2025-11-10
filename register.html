@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>글 등록 — JUP</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap"
+            rel="stylesheet" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <!-- 상단 바 (브랜드: JUP, 로고 없음) -->
+        <header class="topbar">
+            <div class="top-inner">
+                <button class="icon-btn hamburger" aria-label="메뉴 열기">
+                    <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="20" height="2" rx="1" fill="#bbb" />
+                        <rect y="6" width="20" height="2" rx="1" fill="#bbb" />
+                        <rect y="12" width="20" height="2" rx="1" fill="#bbb" />
+                    </svg>
+                </button>
+
+                <a class="brand" href="index.html" aria-label="홈으로">
+                    <span class="brand-text" style="font-weight: 700; letter-spacing: 0.4px">JUP</span>
+                </a>
+
+                <!-- 등록 페이지라 검색박스는 시각 균형만 유지 -->
+                <div class="search-box search-box--empty"></div>
+
+                <div id="authArea">
+                    <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
+                    <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
+                    <div id="profileMenu" class="hidden" aria-hidden="true">
+                        <ul>
+                            <li id="profile-info"><a href="profile.html">내 정보</a></li>
+                            <li id="profile-logout">로그아웃</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button id="addBtn" class="add-btn" aria-label="등록" title="등록">
+                    <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"></path>
+                        <path
+                            d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="container">
+            <section class="hero">
+                <p class="hero-text">사진과 기본 정보만 입력하면 등록 완료!</p>
+            </section>
+
+            <!-- 카드: 사이트 톤 유지 -->
+            <section class="card register-card">
+                <h2 class="page-heading">글 등록</h2>
+
+                <form id="postForm" onsubmit="return false;" class="form-grid">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="title" class="label">제목 <span class="req">*</span></label>
+                            <input
+                                id="title"
+                                type="text"
+                                class="control"
+                                placeholder="예: 검은 지갑, 파란 우산"
+                                required />
+                        </div>
+
+                        <div class="form-field">
+                            <label for="category" class="label">카테고리 <span class="req">*</span></label>
+                            <select id="category" class="control" required>
+                                <option value="">선택</option>
+                                <option>지갑</option>
+                                <option>가방</option>
+                                <option>의류</option>
+                                <option>전자기기</option>
+                                <option>문서/증명</option>
+                                <option>악세서리</option>
+                                <option>기타</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="location" class="label">발견 위치</label>
+                            <input id="location" type="text" class="control" placeholder="예: 도서관 1층 안내데스크" />
+                        </div>
+
+                        <div class="form-field">
+                            <label for="status" class="label">상태</label>
+                            <select id="status" class="control">
+                                <option value="보관중">보관중</option>
+                                <option value="찾는중">찾는중</option>
+                                <option value="완료">완료</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field col-12">
+                            <label for="description" class="label">설명</label>
+                            <textarea
+                                id="description"
+                                rows="4"
+                                class="control"
+                                placeholder="특징, 위치, 픽업 방법 등"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field col-12">
+                            <label class="label">사진 (선택)</label>
+                            <label class="file-drop" for="imageInput">이미지 선택 또는 드래그</label>
+                            <input id="imageInput" type="file" accept="image/*" hidden />
+                            <div id="preview" class="preview"></div>
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button id="submitBtn" class="btn primary" type="submit">등록</button>
+                        <a class="btn" href="index.html">취소</a>
+                        <span id="msg" class="hint"></span>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <script type="module" src="register.js"></script>
+    </body>
+</html>

@@ -1,0 +1,266 @@
+/* profile.css — 덮어쓰기 전용 (replace this file) */
+
+/* --- topbar: main과 같은 'look'을 재현(오버라이드) --- */
+.topbar {
+  background: #1b1b1b; /* 메인과 동일한 톤으로 맞춤 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+
+.topbar .top-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: calc(100% - 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* left group: 햄버거 + 브랜드 텍스트를 한 줄에 정렬 */
+.topbar .left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 햄버거 버튼 (흰색 아이콘 유지) */
+.topbar .icon-btn.hamburger {
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.topbar .icon-btn.hamburger svg rect {
+  fill: #fff;
+}
+
+/* Brand text (JUP) — 햄버거 오른쪽 같은 라인에 위치 */
+.topbar .brand {
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar .brand .brand-text {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff;
+  font-size: 15px;
+}
+
+/* right-group avatar / login button */
+.topbar .right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar #userBtn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.topbar #userBtn img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: none; /* 흰 테두리 제거 */
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0); /* 깔끔하게 */
+}
+
+/* --- 메인 컨텐츠 조정 --- */
+.main-content {
+  max-width: 1100px;
+  margin: 18px auto 80px;
+  padding: 0 20px;
+  color: #e6e6e6;
+}
+
+/* title */
+.profile-title {
+  margin: 8px 0 18px;
+  font-size: 16px;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* wrapper: 카드 + posts(숨김) */
+.profile-wrapper {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* profile card: 조금 밝고, 패딩 넉넉, 그림자 부드럽게 */
+.profile-card {
+  width: 740px; /* 더 넓게 해서 내부 텍스트 줄넘김 줄임 */
+  min-height: 140px;
+  background: linear-gradient(180deg, rgba(38, 38, 38, 0.98), rgba(26, 26, 26, 0.98));
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  color: #dcdcdc;
+  position: relative;
+  overflow: visible;
+  display: block;
+}
+
+/* 내부 컨테이너: 아바타 왼쪽, 정보 오른쪽 */
+.card-inner {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+/* 아바타 */
+.profile-avatar {
+  width: 170px;
+  flex: 0 0 170px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.profile-avatar .profile-photo {
+  width: 170px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* 프로필 정보 (dl) */
+.profile-info {
+  flex: 1 1 auto;
+  min-width: 340px;
+}
+.profile-info dl {
+  margin: 0;
+}
+
+/* row: dt/dd 정렬 */
+.profile-info .row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.profile-info dt {
+  width: 76px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+}
+.profile-info dd {
+  margin: 0;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+.profile-info .input-inline {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 260px;
+}
+
+/* 긴 이메일 텍스트가 줄바꿈 없이 한 줄로 보이게 */
+.long-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+  display: inline-block;
+}
+
+/* 사진 변경 버튼(아바타 아래 y축 정렬) */
+.photo-actions {
+  margin-top: 12px;
+  display: inline-block;
+}
+.chip.avatar-change {
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* 저장/탈퇴 버튼: 카드 우측 하단 고정 배치 */
+.profile-actions {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  display: flex;
+  gap: 12px;
+}
+
+/* 공통 버튼 스타일 */
+.btn {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+/* 저장 (그린) */
+.btn-save {
+  background: linear-gradient(180deg, #1aa37a, #0f8462);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+/* 회원 탈퇴 (레드) */
+.btn-delete {
+  background: linear-gradient(180deg, #e0797f, #c85b5f);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
+/* posts 섹션 숨김 (아직 미구현) */
+.profile-posts {
+  display: none !important;
+}
+
+/* 반응형(너무 좁아지면 카드가 줄어들게) */
+@media (max-width: 900px) {
+  .profile-card {
+    width: calc(100% - 20px);
+  }
+  .profile-actions {
+    position: static;
+    margin-top: 12px;
+  }
+  .card-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .profile-avatar {
+    width: 140px;
+    flex: 0 0 140px;
+  }
+  .profile-info .input-inline {
+    min-width: 100%;
+  }
+}
