@@ -24,7 +24,7 @@ import {
 import {
     getStorage,
     ref as sRef,
-    uploadBytesResumable,
+    uploadBytes,
     getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
@@ -39,13 +39,11 @@ const firebaseConfig = {
     measurementId: "G-RHRK7NJ1FN"
 };
 
-let app;
-if (!getApps().length) app = initializeApp(firebaseConfig);
-else app = getApp();
-
+const cfg = window.firebaseConfig ?? firebaseConfig; // 하나로 통일
+const app = getApps().length ? getApp() : initializeApp(cfg);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+const storage = getStorage(app, `gs://${cfg.storageBucket}`); // cfg 재사용
 const provider = new GoogleAuthProvider();
 
 // 간편 셀렉터(문서 준비 후 사용)
@@ -183,37 +181,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (photoInput) {
         photoInput.addEventListener("change", async (e) => {
-            const file = e.target.files && e.target.files[0];
+            const file = e.target.files[0];
             if (!file) return;
-            if (!currentUser) return alert("로그인 필요");
-            if (file.size > 5 * 1024 * 1024) return alert("5MB 이하 이미지만 업로드 가능합니다.");
-            if (!file.type.startsWith("image/")) return alert("이미지 파일만 업로드 가능합니다.");
 
-            const uid = currentUser.uid;
-            const storageRef = sRef(storage, `profiles/${uid}/${Date.now()}_${file.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            const uid = currentUser?.uid;
+            if (!uid) {
+                alert("로그인 후 이용 가능합니다.");
+                return;
+            }
+
+            // 안전 파일명(공백/한글/특수문자)
+            const safeName =
+                `${Date.now()}_` +
+                encodeURIComponent(file.name)
+                    .replace(/[!'()]/g, escape)
+                    .replace(/\*/g, "%2A");
+
+            const storageRef = sRef(storage, `profiles/${uid}/${safeName}`);
+            const meta = { contentType: file.type || "application/octet-stream" };
+
             if (profilePhoto) profilePhoto.style.opacity = 0.6;
 
             try {
-                await new Promise((resolve, reject) => {
-                    uploadTask.on(
-                        "state_changed",
-                        null,
-                        (err) => reject(err),
-                        () => resolve()
-                    );
-                });
+                await uploadBytes(storageRef, file, meta); // 단순 업로드 (preflight 최소화)
                 const url = await getDownloadURL(storageRef);
+
                 await updateProfile(currentUser, { photoURL: url });
                 try {
                     await updateDoc(doc(db, "users", uid), { currentPhoto: url });
-                } catch (e) {}
+                } catch (_) {}
+
                 if (profilePhoto) profilePhoto.src = url;
                 document.dispatchEvent(new CustomEvent("profile-updated", { detail: { photoURL: url } }));
                 alert("프로필 사진이 업데이트되었습니다.");
-            } catch (e) {
-                console.error(e);
-                alert("업로드 실패: " + (e.message || e));
+            } catch (err) {
+                console.error("업로드 실패:", err);
+                alert("업로드 실패: " + (err.message || err));
             } finally {
                 if (profilePhoto) profilePhoto.style.opacity = 1;
                 photoInput.value = "";
