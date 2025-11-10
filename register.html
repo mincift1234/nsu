@@ -100,8 +100,9 @@
                         </div>
 
                         <div class="form-field">
-                            <label for="status" class="label">상태</label>
-                            <select id="status" class="control">
+                            <label for="status" class="label">상태 <span class="req">*</span></label>
+                            <select id="status" class="control" required>
+                                <option value="">선택</option>
                                 <option value="보관중">보관중</option>
                                 <option value="찾는중">찾는중</option>
                                 <option value="완료">완료</option>
@@ -111,22 +112,27 @@
 
                     <div class="form-row">
                         <div class="form-field col-12">
-                            <label for="description" class="label">설명</label>
+                            <label for="description" class="label">설명 <span class="req">*</span></label>
                             <textarea
                                 id="description"
                                 rows="4"
                                 class="control"
-                                placeholder="특징, 위치, 픽업 방법 등"></textarea>
+                                placeholder="특징, 위치, 픽업 방법 등"
+                                required></textarea>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-field col-12">
-                            <label class="label">사진 (선택)</label>
-                            <label class="file-drop" for="imageInput">이미지 선택 또는 드래그</label>
-                            <input id="imageInput" type="file" accept="image/*" hidden />
-                            <div id="preview" class="preview"></div>
-                        </div>
+                    <!-- 이미지 업로드 영역 -->
+                    <div class="form-field col-12">
+                        <label class="label">사진 업로드 <span class="req">*</span></label>
+                        <label class="file-drop" for="imageInput">이미지 선택 또는 드래그</label>
+                        <input id="imageInput" type="file" accept="image/*" hidden required />
+                        <div id="preview" class="preview"></div>
+
+                        <label class="toggle-box">
+                            <input type="checkbox" id="mosaicToggle" />
+                            <span>사진에 모자이크 적용</span>
+                        </label>
                     </div>
 
                     <div class="btn-row">
