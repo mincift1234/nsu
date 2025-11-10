@@ -805,3 +805,258 @@ textarea.control {
     height: 16px;
     cursor: pointer;
 }
+
+/* ====== 글 등록 카드: 한글 줄바꿈/쪼개짐 방지 ====== */
+/* 카드 전체에 ‘한글은 단어 단위로’, ‘가능하면 한 줄에’ */
+.register-card,
+.register-card * {
+    word-break: keep-all; /* break-all을 덮어쓰기 */
+}
+
+.register-card .seg span,
+.register-card .btn,
+.register-card .chip,
+.register-card .label {
+    white-space: nowrap; /* '습득', '분실', '등록', '취소'가 줄바꿈되지 않도록 */
+}
+
+/* 라디오 토글(습득/분실) 레이아웃 강화 */
+.register-card .seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    background: var(--layer-2);
+    cursor: pointer;
+}
+
+/* 버튼이 세로로 찌그러지지 않도록 */
+.register-card .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    height: 36px;
+    padding: 0 12px;
+}
+
+/* 상태 배지 */
+.status-badge {
+    display: inline-block;
+    margin: 0 0 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #eee;
+}
+.status-badge.is-holding {
+    background: rgba(30, 150, 110, 0.15);
+    border-color: rgba(30, 150, 110, 0.35);
+}
+.status-badge.is-finding {
+    background: rgba(255, 122, 0, 0.15);
+    border-color: rgba(255, 122, 0, 0.35);
+}
+.status-badge.is-done {
+    background: rgba(120, 120, 120, 0.15);
+    border-color: rgba(120, 120, 120, 0.35);
+    color: #cfcfcf;
+}
+/* ----- modal ----- */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+}
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+.modal-panel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    /* 폭을 조금 줄여서 덜 넓게 보이게 */
+    width: min(92vw, 720px);
+    max-height: 86vh;
+    overflow: auto;
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 16px;
+}
+
+/* 넓은 화면에서도 과도하게 넓어지지 않도록 보수적으로 */
+@media (min-width: 1100px) {
+    .modal-panel {
+        width: 700px;
+    }
+}
+.modal-close {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    border: 0;
+    background: transparent;
+    color: #ddd;
+    font-size: 22px;
+    cursor: pointer;
+}
+.modal-body {
+    display: grid;
+    gap: 12px;
+}
+/* 컨테이너는 화면 높이에 따라 유연, 너무 작지도 크지도 않게 */
+.modal-thumb {
+    margin: 0;
+    height: clamp(220px, 56vh, 460px);
+    overflow: hidden;
+    border-radius: 10px;
+    background: #151515;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 이미지 전체가 보이도록 contain 사용 */
+.modal-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* 큰 세로/가로 사진 모두 중앙 정렬 */
+    display: block;
+}
+.modal-title {
+    margin: 2px 0 0;
+    font-weight: 700;
+}
+.modal-meta {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+.modal-desc {
+    margin: 4px 0 10px;
+    white-space: pre-wrap;
+}
+.msg-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.msg-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.msg-box .textarea {
+    flex: 1;
+}
+.owner-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* inbox list */
+.inbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+.inbox-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: #1a1a1a;
+}
+.inbox-item .meta {
+    color: #aaa;
+    font-size: 12px;
+    margin: 0;
+}
+.inbox-item .title {
+    margin: 0 0 4px;
+    font-weight: 600;
+}
+
+/* header inbox badge (작고 톤 다운) */
+#inboxBtn {
+    position: relative;
+}
+.badge {
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #d24;
+    color: #fff;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.msg-opt {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.seg-radio {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: #1a1a1a;
+}
+.seg-radio input {
+    accent-color: var(--accent);
+}
+.inbox-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+.inbox-reply {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+.inbox-reply .textarea {
+    min-height: 70px;
+}
+
+/* 인박스 카드: 버튼을 카드 우하단 고정 */
+.inbox-item {
+    position: relative;
+}
+.inbox-item .content {
+    position: relative;
+    padding-bottom: 44px;
+} /* 버튼 자리 확보 */
+.inbox-actions {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    gap: 8px;
+}
