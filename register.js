@@ -20,7 +20,6 @@ import {
     getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
-// ※ 네 프로젝트에 맞는 구성 (기존 값 유지)
 const firebaseConfig = {
     apiKey: "AIzaSyCpE_MfBizTqyY2v_cQOrBX4q6KhIi5mrk",
     authDomain: "something-e578a.firebaseapp.com",
@@ -31,13 +30,13 @@ const firebaseConfig = {
     measurementId: "G-RHRK7NJ1FN"
 };
 
+// Firebase 초기화
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
-// ---------- DOM ----------
 const $ = (s) => document.querySelector(s);
 const form = $("#postForm");
 const titleEl = $("#title");
@@ -47,28 +46,27 @@ const statusEl = $("#status");
 const descEl = $("#description");
 const imgInput = $("#imageInput");
 const preview = $("#preview");
+const mosaicToggle = $("#mosaicToggle");
 const submitBtn = $("#submitBtn");
 const msg = $("#msg");
 
-// 헤더(로그인/아바타)
-const loginBtn = $("#loginBtn"); // Google 로그인 버튼
-const userAvatar = $("#userAvatar"); // <img>
-const profileMenu = $("#profileMenu"); // 드롭다운 컨테이너
-const profileInfo = $("#profile-info"); // '내 정보'
-const profileLogout = $("#profile-logout"); // '로그아웃'
+// 헤더 관련
+const loginBtn = $("#loginBtn");
+const userAvatar = $("#userAvatar");
+const profileMenu = $("#profileMenu");
+const profileInfo = $("#profile-info");
+const profileLogout = $("#profile-logout");
 
-// ---------- Auth UI ----------
 let currentUser = null;
 let selectedFile = null;
 
+// ---------- Auth UI ----------
 function setHeaderAuthUI(user) {
     const show = (el) => el && (el.style.display = "");
     const hide = (el) => el && (el.style.display = "none");
 
     if (user) {
         currentUser = user;
-
-        // 로그인 버튼 숨김, 아바타 노출
         hide(loginBtn);
         if (userAvatar) {
             userAvatar.src = user.photoURL || "https://i.imgur.com/4ZQZ4sS.png";
@@ -76,14 +74,12 @@ function setHeaderAuthUI(user) {
         }
     } else {
         currentUser = null;
-        // 아바타/메뉴 숨기고 로그인 버튼 노출
         show(loginBtn);
         if (userAvatar) userAvatar.style.display = "none";
         if (profileMenu) profileMenu.classList.remove("open");
     }
 }
 
-// 로그인 버튼 → 로그인
 loginBtn?.addEventListener("click", async (e) => {
     e.preventDefault();
     try {
@@ -93,39 +89,25 @@ loginBtn?.addEventListener("click", async (e) => {
     }
 });
 
-// 아바타 클릭 → 드롭다운 토글
 userAvatar?.addEventListener("click", (e) => {
     e.stopPropagation();
     profileMenu?.classList.toggle("open");
 });
-
-// 드롭다운 외부 클릭시 닫기
 document.addEventListener("click", () => {
     profileMenu?.classList.remove("open");
 });
-
-// 드롭다운 항목
-profileInfo?.addEventListener("click", (e) => {
-    e.preventDefault();
-    location.href = "profile.html";
-});
-profileLogout?.addEventListener("click", async (e) => {
-    e.preventDefault();
+profileInfo?.addEventListener("click", () => (location.href = "profile.html"));
+profileLogout?.addEventListener("click", async () => {
     try {
         await signOut(auth);
-        alert("로그아웃 되었습니다.");
         location.reload();
     } catch (err) {
         alert("로그아웃 실패: " + err.message);
     }
 });
+onAuthStateChanged(auth, (user) => setHeaderAuthUI(user));
 
-// 로그인 상태 반영
-onAuthStateChanged(auth, (user) => {
-    setHeaderAuthUI(user);
-});
-
-// ---------- 이미지 미리보기 ----------
+// ---------- 이미지 미리보기 / 삭제 ----------
 imgInput?.addEventListener("change", () => {
     const f = imgInput.files?.[0];
     selectedFile = f || null;
@@ -133,29 +115,85 @@ imgInput?.addEventListener("change", () => {
     preview.innerHTML = "";
     if (!selectedFile) return;
 
-    const url = URL.createObjectURL(selectedFile);
-    const img = new Image();
-    img.src = url;
-    img.onload = () => URL.revokeObjectURL(url);
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "relative";
+    wrapper.style.display = "inline-block";
 
-    img.style.width = "140px";
-    img.style.height = "105px";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "10px";
-    img.style.boxShadow = "0 6px 16px rgba(0,0,0,0.35)";
+    const imgEl = new Image();
+    imgEl.src = URL.createObjectURL(selectedFile);
+    imgEl.style.width = "140px";
+    imgEl.style.height = "105px";
+    imgEl.style.objectFit = "cover";
+    imgEl.style.borderRadius = "10px";
+    imgEl.style.boxShadow = "0 6px 16px rgba(0,0,0,0.35)";
 
-    preview.appendChild(img);
+    // 삭제 버튼
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "×";
+    removeBtn.style.position = "absolute";
+    removeBtn.style.top = "4px";
+    removeBtn.style.right = "6px";
+    removeBtn.style.background = "rgba(0,0,0,0.6)";
+    removeBtn.style.color = "#fff";
+    removeBtn.style.border = "none";
+    removeBtn.style.borderRadius = "50%";
+    removeBtn.style.width = "20px";
+    removeBtn.style.height = "20px";
+    removeBtn.style.cursor = "pointer";
+    removeBtn.onclick = () => {
+        preview.innerHTML = "";
+        imgInput.value = "";
+        selectedFile = null;
+    };
+
+    wrapper.appendChild(imgEl);
+    wrapper.appendChild(removeBtn);
+    preview.appendChild(wrapper);
 });
 
-// ---------- 업로드 & 저장 ----------
-async function uploadImageIfNeeded() {
+// ---------- 업로드 시 모자이크 처리 ----------
+async function processImageForUpload(file, applyMosaic) {
+    if (!applyMosaic) return file; // 모자이크 안함
+
+    const img = await new Promise((resolve) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.src = URL.createObjectURL(file);
+    });
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const w = img.width;
+    const h = img.height;
+    canvas.width = w;
+    canvas.height = h;
+
+    const pixel = 30; // 강도
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, 0, 0, w / pixel, h / pixel);
+    ctx.drawImage(canvas, 0, 0, w / pixel, h / pixel, 0, 0, w, h);
+
+    return await new Promise((resolve) => {
+        canvas.toBlob(
+            (blob) => {
+                resolve(new File([blob], file.name, { type: "image/jpeg" }));
+            },
+            "image/jpeg",
+            0.9
+        );
+    });
+}
+
+// ---------- Firebase 업로드 ----------
+async function uploadImageIfNeeded(applyMosaic) {
     if (!selectedFile || !currentUser) return [];
 
-    const path = `items/${currentUser.uid}/${Date.now()}_${selectedFile.name}`;
+    const fileToUpload = await processImageForUpload(selectedFile, applyMosaic);
+    const path = `items/${currentUser.uid}/${Date.now()}_${fileToUpload.name}`;
     const ref = sRef(storage, path);
 
     await new Promise((resolve, reject) => {
-        const task = uploadBytesResumable(ref, selectedFile);
+        const task = uploadBytesResumable(ref, fileToUpload);
         task.on("state_changed", null, reject, resolve);
     });
 
@@ -165,15 +203,14 @@ async function uploadImageIfNeeded() {
 
 // ---------- 제출 ----------
 form?.addEventListener("submit", async (e) => {
-    e.preventDefault(); // 기본 submit 막기
+    e.preventDefault();
 
-    // 비로그인 → 즉시 로그인 시도
     if (!currentUser) {
         try {
             await signInWithPopup(auth, provider);
-            if (!auth.currentUser) return; // 사용자가 취소한 경우
-        } catch (err) {
-            return alert("로그인 후 등록할 수 있어요.");
+            if (!auth.currentUser) return;
+        } catch {
+            return alert("로그인 후 등록할 수 있습니다.");
         }
     }
 
@@ -182,17 +219,18 @@ form?.addEventListener("submit", async (e) => {
     const location = locationEl.value.trim();
     const status = statusEl.value.trim();
     const description = descEl.value.trim();
+    const applyMosaic = mosaicToggle?.checked;
 
-    if (!title || !category) {
-        return alert("제목과 카테고리를 입력하세요.");
-    }
+    if (!title || !category) return alert("제목과 카테고리를 입력하세요.");
+    if (!status) return alert("상태를 선택하세요.");
+    if (!description) return alert("설명을 입력하세요.");
+    if (!selectedFile) return alert("사진을 업로드하세요.");
 
     submitBtn.disabled = true;
     msg.textContent = "업로드 중...";
 
     try {
-        const images = await uploadImageIfNeeded();
-
+        const images = await uploadImageIfNeeded(applyMosaic);
         await addDoc(collection(db, "items"), {
             ownerId: auth.currentUser.uid,
             title,
@@ -200,7 +238,7 @@ form?.addEventListener("submit", async (e) => {
             location,
             status,
             description,
-            images, // [] 또는 [url]
+            images,
             createdAt: serverTimestamp()
         });
 
