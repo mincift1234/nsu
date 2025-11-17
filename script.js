@@ -20,7 +20,8 @@ import {
     where,
     serverTimestamp,
     deleteDoc,
-    doc
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // ----- 1) Firebase 초기화 (본인 프로젝트 값으로 교체) -----
@@ -318,9 +319,10 @@ function openItemModal(it) {
     (document.getElementById("mDesc") || {}).textContent = it.description || "";
 
     const me = (auth.currentUser && auth.currentUser.uid) || null;
-    // 아래 한 줄이 정확히 이 이름이어야 함 (대/소문자 포함)
-    const owner = pickOwnerUid(it);
+    const owner = pickOwnerUid(it); // 글 작성자 uid
     const ownerWrap = document.getElementById("ownerActions");
+
+    // 글 작성자일 때만 수정/삭제 버튼 노출
     if (me && owner && me === owner) {
         ownerWrap.style.display = "";
         document.getElementById("btnEdit").onclick = () => {
@@ -340,9 +342,153 @@ function openItemModal(it) {
         ownerWrap.style.display = "none";
     }
 
+    // ───────────────────────────────
+    //  인증용 UI (분실자/습득자 역할에 따라)
+    // ───────────────────────────────
+    const authBox = document.getElementById("authActions");
+    if (authBox) {
+        authBox.innerHTML = "";
+        authBox.style.display = "none";
+    }
+
+    const status = it.status || ""; // "보관중" / "찾는중" / "완료" 등
+
+    // 로그인 + 작성자 정보가 있고, 내가 작성자가 아닐 때만 인증 UI를 보여준다.
+    if (authBox && me && owner && me !== owner) {
+        // 1) 보관중: 글 작성자는 '습득자', 모달을 보는 사람은 '분실자(주인 후보)'
+        if (status === "보관중") {
+            authBox.style.display = "block";
+            authBox.innerHTML = `
+                <div class="auth-section">
+                    <p class="auth-help">
+                        이 물건의 주인이라고 생각된다면, 물건의 생김새와 특징을 자세히 적어서 인증을 보내주세요.
+                        <small>예: 색깔, 브랜드, 안에 들어있던 물건 등 (주민등록번호/계좌번호/카드번호는 절대 적지 마세요)</small>
+                    </p>
+                    <textarea id="authDesc" class="textarea" rows="3"
+                        placeholder="예: 검은색 지갑, 안쪽에 파란색 학생증과 현금 5천원, 바깥쪽 오른쪽 아래에 작은 흠집이 있음"></textarea>
+                    <div class="auth-actions-row">
+                        <button id="authSend" class="chip">이 물건의 주인입니다 (인증 보내기)</button>
+                    </div>
+                </div>
+            `;
+
+            const authSendBtn = document.getElementById("authSend");
+            const authDesc = document.getElementById("authDesc");
+
+            authSendBtn.onclick = async () => {
+                const text = (authDesc.value || "").trim();
+                if (!text) return alert("물건의 특징을 자세히 적어 주세요.");
+
+                if (!auth.currentUser) {
+                    try {
+                        await signInWithPopup(auth, provider);
+                    } catch (e) {
+                        return;
+                    }
+                    if (!auth.currentUser) return;
+                }
+
+                const toUid = owner; // 글 작성자(습득자)
+                const fromUid = auth.currentUser.uid; // 분실자(주인 후보)
+                if (!toUid) return alert("작성자 정보가 없습니다.");
+                if (toUid === fromUid) return alert("자기 글에는 인증을 보낼 수 없습니다.");
+
+                try {
+                    await addDoc(collection(db, "messages"), {
+                        toUid,
+                        fromUid,
+                        itemId: it.id,
+                        content: text,
+                        isAnon: false, // 인증은 닉네임 기준으로
+                        anonLabel: null,
+                        senderName: auth.currentUser.displayName || "",
+                        read: false,
+                        createdAt: serverTimestamp(),
+                        itemTitle: it.title || "",
+                        itemThumb: (it.images && it.images[0]) || "",
+                        type: "auth_answer", // 인증 설명
+                        role: "owner", // "나는 주인이다" 주장
+                        authStatus: "pending" // 추후 'accepted' / 'rejected'로 확장 예정
+                    });
+                    authDesc.value = "";
+                    alert("인증 설명을 보냈습니다. 상대가 내용을 보고 확인할 거예요.");
+                    loadInboxCount();
+                } catch (e) {
+                    alert("전송 실패: " + (e.message || e));
+                }
+            };
+        }
+
+        // 2) 찾는중: 글 작성자는 '분실자', 모달을 보는 사람은 '습득자 후보'
+        else if (status === "찾는중") {
+            authBox.style.display = "block";
+            authBox.innerHTML = `
+                <div class="auth-section">
+                    <p class="auth-help">
+                        이 물건을 실제로 발견했다면, 분실자에게 물건의 생김새를 설명해 달라고 요청할 수 있습니다.
+                    </p>
+                    <div class="auth-actions-row">
+                        <button id="authAsk" class="chip chip--ghost">
+                            이 물건을 발견했습니다 (생김새 요청 보내기)
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const authAskBtn = document.getElementById("authAsk");
+
+            authAskBtn.onclick = async () => {
+                if (!auth.currentUser) {
+                    try {
+                        await signInWithPopup(auth, provider);
+                    } catch (e) {
+                        return;
+                    }
+                    if (!auth.currentUser) return;
+                }
+
+                const toUid = owner; // 글 작성자(분실자)
+                const fromUid = auth.currentUser.uid; // 습득자 후보
+                if (!toUid) return alert("작성자 정보가 없습니다.");
+                if (toUid === fromUid) return alert("자기 글에는 요청을 보낼 수 없습니다.");
+
+                const text =
+                    "이 물건을 제가 발견한 것 같습니다. 카드번호나 주민등록번호 같은 민감한 정보는 제외하고, " +
+                    "물건의 색깔, 특징, 안에 들어있던 물건 등을 설명해 주시면 실제 분실물인지 확인해 보겠습니다.";
+
+                try {
+                    await addDoc(collection(db, "messages"), {
+                        toUid,
+                        fromUid,
+                        itemId: it.id,
+                        content: text,
+                        isAnon: false,
+                        anonLabel: null,
+                        senderName: auth.currentUser.displayName || "",
+                        read: false,
+                        createdAt: serverTimestamp(),
+                        itemTitle: it.title || "",
+                        itemThumb: (it.images && it.images[0]) || "",
+                        type: "auth_question", // 생김새 설명 요청
+                        role: "finder", // "나는 습득자다" 주장
+                        authStatus: "pending"
+                    });
+                    alert("생김새 설명을 요청하는 쪽지를 보냈습니다.");
+                    loadInboxCount();
+                } catch (e) {
+                    alert("전송 실패: " + (e.message || e));
+                }
+            };
+        }
+    }
+
+    // ───────────────────────────────
+    //  기존 일반 쪽지 보내기 (그대로 두되 필드만 살짝 확장)
+    // ───────────────────────────────
     const msgSend = document.getElementById("msgSend");
     const msgInput = document.getElementById("msgInput");
     msgInput.value = "";
+
     msgSend.onclick = async () => {
         const text = (document.getElementById("msgInput")?.value || "").trim();
         if (!text) return alert("쪽지 내용을 입력하세요.");
@@ -383,7 +529,10 @@ function openItemModal(it) {
                 read: false,
                 createdAt: serverTimestamp(),
                 itemTitle: it.title || "",
-                itemThumb: (it.images && it.images[0]) || ""
+                itemThumb: (it.images && it.images[0]) || "",
+                type: "normal", // 일반 쪽지
+                role: "normal",
+                authStatus: null
             });
             document.getElementById("msgInput").value = "";
             alert("보냈습니다.");
@@ -413,13 +562,15 @@ document.querySelectorAll(".modal").forEach((mod) => {
     });
 });
 
+// 받은 쪽지 불러오기 + 인증 흐름
 async function loadInbox() {
     const listEl = document.getElementById("inboxList");
     if (!auth.currentUser) {
         listEl.innerHTML = `<div class="muted">로그인이 필요합니다.</div>`;
         return;
     }
-    listEl.innerHTML = `<div class="muted">불러오는 중...</div>`;
+    listEl.innerHTML = `<div class="muted">불러오는 중.</div>`;
+
     try {
         const snap = await getDocs(collection(db, "messages"));
         const me = auth.currentUser.uid;
@@ -438,31 +589,118 @@ async function loadInbox() {
             .map((m) => {
                 const who = m.isAnon ? m.anonLabel || "익명" : m.senderName || "닉네임 없음";
                 const ts = m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000).toLocaleString() : "";
-                return `
-    <div class="inbox-item" data-id="${m.id}" data-from="${m.fromUid}" data-item="${m.itemId}">
-      <img src="${m.itemThumb || "https://picsum.photos/seed/p/120/80"}" alt=""
-           style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
-      <div class="content" style="flex:1">
-        <p class="title">${m.itemTitle || "제목 없음"}</p>
-        <p class="meta">${who} · ${ts}</p>
-        <p>${(m.content || "").replace(/</g, "&lt;")}</p>
+                const type = m.type || "normal"; // normal / auth_question / auth_answer / handover_info ...
+                const authStatus = m.authStatus || null; // pending / accepted / rejected / null
+                const handoverStatus = m.handoverStatus || null;
 
-        <div class="inbox-actions">
-          <button class="chip chip--ghost btn-reply">답장</button>
-          <button class="chip" style="background:#b33;" data-role="del">삭제</button>
+                // ── 뱃지(“인증 요청 / 인증 답변”) ─────────────────
+                let typeBadgeHtml = "";
+                if (type === "auth_question") {
+                    typeBadgeHtml = `<span class="badge-auth badge-auth--question">생김새 설명 요청</span>`;
+                } else if (type === "auth_answer") {
+                    typeBadgeHtml = `<span class="badge-auth badge-auth--answer">주인 인증 답변</span>`;
+                }
+
+                // ── 인증 상태 텍스트 ─────────────────────────────
+                let authStateHtml = "";
+                let extraClass = "";
+                if (type === "auth_answer" && authStatus) {
+                    let label = "";
+                    if (authStatus === "pending") {
+                        label = "주인 인증 대기중";
+                        extraClass = "auth-state--pending";
+                    } else if (authStatus === "accepted") {
+                        label = "주인 인증 완료";
+                        extraClass = "auth-state--accepted";
+                    } else if (authStatus === "rejected") {
+                        label = "주인 인증 거절";
+                        extraClass = "auth-state--rejected";
+                    }
+                    authStateHtml = `<span class="auth-state ${extraClass}">${label}</span>`;
+                }
+
+                // ── 승인/거절 버튼 (내가 ‘습득자’ 입장에서 받은 인증 답변일 때만) ──
+                let authActionsHtml = "";
+                if (type === "auth_answer" && authStatus === "pending") {
+                    authActionsHtml = `
+                        <div class="auth-verify">
+                            <button class="chip chip--ghost btn-auth-accept">
+                                이 사람 맞는 것 같아요
+                            </button>
+                            <button class="chip chip--ghost btn-auth-reject">
+                                아닌 것 같아요
+                            </button>
+                        </div>
+                    `;
+                }
+
+                let authAnswerBoxHtml = "";
+                if (type === "auth_question") {
+                    authAnswerBoxHtml = `
+        <div class="auth-answer-area">
+            <textarea class="textarea auth-answer-text" rows="3"
+                placeholder="물건의 색깔, 특징, 안에 들어있던 물건을 자세히 적어주세요."></textarea>
+            <button class="chip btn-auth-answer-send">생김새 설명 보내기</button>
         </div>
-      </div>
+    `;
+                }
 
-      <!-- 답장 영역은 content 바깥에 두어 버튼과 겹치지 않게 -->
-      <div class="inbox-reply" style="display:none;grid-column:1 / -1;">
-        <textarea class="textarea rp-text" rows="3" placeholder="${who}에게 답장"></textarea>
-        <button class="chip rp-send">보내기</button>
-      </div>
-    </div>`;
+                // ── 전달 완료 처리 버튼 (인증 완료 + 아직 전달 완료 표시 전) ──
+                let handoverActionsHtml = "";
+                if (type === "auth_answer" && authStatus === "accepted") {
+                    if (handoverStatus === "done") {
+                        authStateHtml += `<span class="handover-state"> · 전달 완료</span>`;
+                    } else {
+                        handoverActionsHtml = `
+                            <div class="handover-actions">
+                                <button class="chip chip--ghost btn-handover-done">
+                                    주인에게 전달 완료 처리
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+
+                const safeContent = (m.content || "").replace(/</g, "&lt;");
+
+                return `
+        <div class="inbox-item"
+             data-id="${m.id}"
+             data-from="${m.fromUid}"
+             data-item="${m.itemId || ""}"
+             data-type="${type}"
+             data-title="${(m.itemTitle || "").replace(/"/g, "&quot;")}"
+             data-thumb="${m.itemThumb || ""}">
+          <img src="${m.itemThumb || "https://picsum.photos/seed/p/120/80"}" alt=""
+               style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
+          <div class="content" style="flex:1">
+            <p class="title">${m.itemTitle || "제목 없음"}</p>
+            <p class="meta">
+              ${who} · ${ts}
+              ${typeBadgeHtml}
+              ${authStateHtml}
+            </p>
+            <p>${safeContent}</p>
+
+            <div class="inbox-actions">
+              <button class="chip chip--ghost btn-reply">답장</button>
+              <button class="chip" style="background:#b33;" data-role="del">삭제</button>
+            </div>
+
+            ${authActionsHtml}
+            ${handoverActionsHtml}
+            ${authAnswerBoxHtml}
+          </div>
+
+          <div class="inbox-reply" style="display:none;">
+            <textarea class="textarea rp-text" rows="3" placeholder="${who}에게 답장"></textarea>
+            <button class="chip rp-send">보내기</button>
+          </div>
+        </div>`;
             })
             .join("");
 
-        // 이벤트: 답장 토글
+        // ===== 답장 영역 토글 =====
         listEl.querySelectorAll(".btn-reply").forEach((btn) => {
             btn.addEventListener("click", (e) => {
                 const wrap = e.target.closest(".inbox-item");
@@ -471,41 +709,76 @@ async function loadInbox() {
             });
         });
 
-        // 이벤트: 답장 보내기
+        // ===== 답장 보내기 (인증 요청에 대한 답장은 자동으로 'auth_answer') =====
         listEl.querySelectorAll(".rp-send").forEach((btn) => {
             btn.addEventListener("click", async (e) => {
                 const wrap = e.target.closest(".inbox-item");
-                const toUid = wrap.dataset.from; // 보낸 사람에게 회신
-                const itemId = wrap.dataset.item;
+                const toUid = wrap.dataset.from; // 원래 보낸 사람에게 회신
+                const itemId = wrap.dataset.item || "";
+                const parentType = wrap.dataset.type || "normal";
                 const text = (wrap.querySelector(".rp-text")?.value || "").trim();
+
                 if (!text) return alert("답장 내용을 입력하세요.");
-                if (!auth.currentUser) return alert("로그인 필요합니다.");
+                if (!auth.currentUser) return alert("로그인이 필요합니다.");
+                const fromUid = auth.currentUser.uid;
+                if (toUid === fromUid) return alert("자기 자신에게는 쪽지를 보낼 수 없습니다.");
+
+                const mode = getSenderMode();
+                let senderName = auth.currentUser.displayName || "";
+                let anonLabel = null;
+                let isAnon = false;
+
+                if (mode === "anon") {
+                    isAnon = true;
+                    anonLabel = await ensureAnonLabel(toUid, itemId, fromUid);
+                    senderName = "";
+                }
+
+                // 기본값은 일반 쪽지
+                let msgType = "normal";
+                let role = "normal";
+                let authStatus = null;
+
+                // 부모 쪽지가 'auth_question'이면 → 이 답장은 'auth_answer'로 처리
+                if (parentType === "auth_question") {
+                    msgType = "auth_answer";
+                    role = "owner"; // 주인 측 답변
+                    authStatus = "pending"; // 습득자가 확인 전
+                }
 
                 try {
                     await addDoc(collection(db, "messages"), {
                         toUid,
-                        fromUid: auth.currentUser.uid,
+                        fromUid,
                         itemId,
                         content: text,
-                        isAnon: false, // 답장은 닉네임 표시(요구대로 익명은 글 작성자 기준임)
-                        anonLabel: null,
-                        senderName: auth.currentUser.displayName || "",
+                        isAnon,
+                        anonLabel,
+                        senderName,
                         read: false,
-                        createdAt: serverTimestamp()
+                        createdAt: serverTimestamp(),
+                        itemTitle: wrap.dataset.title || "",
+                        itemThumb: wrap.dataset.thumb || "",
+                        type: msgType,
+                        role,
+                        authStatus
                     });
                     wrap.querySelector(".rp-text").value = "";
                     alert("보냈습니다.");
+                    loadInboxCount();
+                    await loadInbox();
                 } catch (err) {
                     alert("전송 실패: " + (err.message || err));
                 }
             });
         });
 
-        // 이벤트: 삭제
-        listEl.querySelectorAll("[data-role='del']").forEach((btn) => {
+        // ===== 쪽지 삭제 =====
+        listEl.querySelectorAll('button[data-role="del"]').forEach((btn) => {
             btn.addEventListener("click", async (e) => {
                 const wrap = e.target.closest(".inbox-item");
                 const id = wrap.dataset.id;
+                if (!id) return;
                 if (!confirm("이 쪽지를 삭제할까요?")) return;
                 try {
                     await deleteDoc(doc(db, "messages", id));
@@ -513,6 +786,153 @@ async function loadInbox() {
                     loadInboxCount();
                 } catch (err) {
                     alert("삭제 실패: " + (err.message || err));
+                }
+            });
+        });
+
+        // ===== 인증 승인 / 거절 =====
+        listEl.querySelectorAll(".btn-auth-accept").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+                const wrap = e.target.closest(".inbox-item");
+                const msgId = wrap.dataset.id;
+                const itemId = wrap.dataset.item;
+                const ownerUid = wrap.dataset.from; // 주인으로 인증되는 사람
+
+                if (!msgId || !itemId || !ownerUid) return;
+                if (!confirm("정말 이 사람이 이 물건의 주인이 맞나요?\n(확인 후에는 전달 과정만 남습니다.)")) return;
+
+                // 전달 방법 안내 메시지 입력
+                let extra = prompt(
+                    "어디에 맡겼는지, 혹은 언제/어디서 전달 가능한지 입력해 주세요.\n" +
+                        "예) 공학관 3층 학과 과사무실에 맡겨두었습니다."
+                );
+                extra = (extra || "").trim();
+
+                try {
+                    // 1) 이 인증 답변 쪽지 상태 변경
+                    await updateDoc(doc(db, "messages", msgId), {
+                        authStatus: "accepted"
+                    });
+
+                    // 2) 해당 글에 '인증된 주인 uid'만 기록 (글 상태는 그대로 유지)
+                    await updateDoc(doc(db, "items", itemId), {
+                        authVerifiedOwnerUid: ownerUid
+                    });
+
+                    // 3) 전달 위치/시간 안내 쪽지를 추가로 보내기 (입력했을 때만)
+                    if (extra) {
+                        const fromUid = auth.currentUser.uid;
+                        await addDoc(collection(db, "messages"), {
+                            toUid: ownerUid,
+                            fromUid,
+                            itemId,
+                            content: extra,
+                            isAnon: false,
+                            anonLabel: null,
+                            senderName: auth.currentUser.displayName || "",
+                            read: false,
+                            createdAt: serverTimestamp(),
+                            itemTitle: wrap.dataset.title || "",
+                            itemThumb: wrap.dataset.thumb || "",
+                            type: "handover_info",
+                            role: "finder",
+                            authStatus: null
+                        });
+                    }
+
+                    alert("주인 인증으로 처리했습니다.\n실제 전달이 끝나면 '전달 완료 처리' 버튼을 눌러 주세요.");
+                    await fetchItems();
+                    await loadInbox();
+                } catch (err) {
+                    alert("처리 실패: " + (err.message || err));
+                }
+            });
+        });
+
+        listEl.querySelectorAll(".btn-auth-reject").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+                const wrap = e.target.closest(".inbox-item");
+                const msgId = wrap.dataset.id;
+                const itemId = wrap.dataset.item;
+
+                if (!msgId || !itemId) return;
+                if (!confirm("이 사람은 주인이 아닌 것으로 처리할까요?")) return;
+
+                try {
+                    await updateDoc(doc(db, "messages", msgId), {
+                        authStatus: "rejected"
+                    });
+                    alert("주인 인증 거절로 처리했습니다.");
+                    await loadInbox();
+                } catch (err) {
+                    alert("처리 실패: " + (err.message || err));
+                }
+            });
+        });
+
+        // ===== 전달 완료 처리 =====
+        listEl.querySelectorAll(".btn-handover-done").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+                const wrap = e.target.closest(".inbox-item");
+                const msgId = wrap.dataset.id;
+                const itemId = wrap.dataset.item;
+
+                if (!msgId || !itemId) return;
+                if (!confirm("실제로 물건을 주인에게 전달하셨나요?\n글 상태를 '완료'로 변경합니다.")) return;
+
+                try {
+                    // 글 상태를 '완료'로 변경
+                    await updateDoc(doc(db, "items", itemId), {
+                        status: "완료"
+                    });
+
+                    // 이 쪽지에도 전달 완료 표시
+                    await updateDoc(doc(db, "messages", msgId), {
+                        handoverStatus: "done"
+                    });
+
+                    alert("글 상태를 '완료'로 변경했습니다.");
+                    await fetchItems();
+                    await loadInbox();
+                } catch (err) {
+                    alert("처리 실패: " + (err.message || err));
+                }
+            });
+        });
+
+        listEl.querySelectorAll(".btn-auth-answer-send").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+                const wrap = e.target.closest(".inbox-item");
+                const toUid = wrap.dataset.from;
+                const itemId = wrap.dataset.item;
+                const text = (wrap.querySelector(".auth-answer-text")?.value || "").trim();
+
+                if (!text) return alert("생김새 설명을 입력해주세요.");
+                if (!auth.currentUser) return alert("로그인이 필요합니다.");
+
+                try {
+                    await addDoc(collection(db, "messages"), {
+                        toUid,
+                        fromUid: auth.currentUser.uid,
+                        itemId,
+                        content: text,
+                        isAnon: false,
+                        anonLabel: null,
+                        senderName: auth.currentUser.displayName || "",
+                        read: false,
+                        createdAt: serverTimestamp(),
+                        itemTitle: wrap.dataset.title || "",
+                        itemThumb: wrap.dataset.thumb || "",
+                        type: "auth_answer",
+                        role: "owner",
+                        authStatus: "pending"
+                    });
+
+                    alert("생김새 설명을 보냈습니다.");
+                    await loadInbox();
+                    loadInboxCount();
+                } catch (err) {
+                    alert("전송 실패: " + (err.message || err));
                 }
             });
         });
