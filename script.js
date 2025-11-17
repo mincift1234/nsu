@@ -21,8 +21,11 @@ import {
     serverTimestamp,
     deleteDoc,
     doc,
-    updateDoc
+    updateDoc,
+    setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js";
 
 // ----- 1) Firebase 초기화 (본인 프로젝트 값으로 교체) -----
 const firebaseConfig = {
@@ -38,6 +41,49 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+const messaging = getMessaging(app);
+
+// 특정 유저의 브라우저 FCM 토큰을 Firestore에 저장
+async function registerFcmToken(user) {
+    try {
+        // 알림 권한 요청
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+            console.log("알림 권한이 허용되지 않았습니다.");
+            return;
+        }
+
+        // Firebase Console > Cloud Messaging > Web Push 인증서에서 복사한 공개키
+        const vapidKey = "BNiszm8wR4AkRozXusasT3VrNII8CT2hNdVEFgAp3vPLQ4HwpJZ-YXKf1p5LBXOiIyF9Afl-sB7pTkdHoyRxD6Y";
+
+        const token = await getToken(messaging, { vapidKey });
+        if (!token) {
+            console.log("FCM 토큰을 가져오지 못했습니다.");
+            return;
+        }
+        console.log("FCM token:", token);
+
+        // 유저 uid 기준으로 토큰 저장/업데이트
+        const uid = user.uid;
+        await setDoc(doc(db, "fcmTokens", uid), {
+            token,
+            updatedAt: serverTimestamp()
+        });
+    } catch (err) {
+        console.error("FCM 토큰 등록 실패:", err);
+    }
+}
+
+// 페이지가 열려 있을 때 오는 알림 처리 (선택, 있으면 편함)
+onMessage(messaging, (payload) => {
+    console.log("포그라운드 메시지:", payload);
+    const { title, body } = payload.notification || {};
+    if (Notification.permission === "granted") {
+        new Notification(title || "새 알림", {
+            body: body || ""
+        });
+    }
+});
 
 /* 2) 헬퍼 & 상태 */
 const $ = (sel, p = document) => p.querySelector(sel);
@@ -125,11 +171,13 @@ function pickOwnerUid(it) {
 }
 
 /* 4) 렌더 */
+/* 4) 렌더 */
 function renderList() {
     const wrap = $("#listings");
     const q = state.q.trim().toLowerCase();
     const cat = state.cat;
 
+    // 검색/카테고리 필터 그대로 유지
     const filtered = state.items.filter((it) => {
         const txt = `${it.title || ""} ${it.location || ""} ${it.description || ""}`.toLowerCase();
         const mt = q ? txt.includes(q) : true;
@@ -142,9 +190,15 @@ function renderList() {
         return;
     }
 
-    wrap.innerHTML = filtered
-        .map(
-            (it) => `
+    // 섹션 순서 정의
+    const sections = [
+        { status: "보관중", label: "🟢 발견한 글" },
+        { status: "찾는중", label: "🟠 찾는 글" },
+        { status: "완료", label: "⚪ 완료된 글" }
+    ];
+
+    // 카드 HTML 만드는 함수 (기존 카드 모양 그대로)
+    const cardHtml = (it) => `
     <article class="card" data-id="${it.id}">
       <figure class="thumb">
         <img src="${(it.images && it.images[0]) || "https://picsum.photos/seed/placeholder/800/600"}" alt="${it.title || "분실물"}" loading="lazy">
@@ -153,14 +207,43 @@ function renderList() {
         <h3 class="title">${it.title || "제목 없음"}</h3>
         <p class="price">${it.priceText || (it.reward ? "보상 있음" : "문의")}</p>
         <p class="status-badge ${statusClass(it.status)}">${it.status || "상태 미상"}</p>
-<p class="meta">
-  ${it.location || "위치 미상"} · ${it.dateType === "lost" ? "분실" : "습득"} ${timeAgoAny(it.eventAt || it.lostAt || it.foundAt || it.createdAt)}
-</p>
+        <p class="meta">
+          ${it.location || "위치 미상"} · ${it.dateType === "lost" ? "분실" : "습득"} ${timeAgoAny(it.eventAt || it.lostAt || it.foundAt || it.createdAt)}
+        </p>
       </div>
     </article>
-  `
-        )
-        .join("");
+    `;
+
+    let html = "";
+
+    // 1) 보관중(발견한 글) → 2) 찾는중 → 3) 완료 순서대로 섹션 출력
+    sections.forEach((sec) => {
+        const group = filtered.filter((it) => (it.status || "") === sec.status);
+        if (!group.length) return; // 이 상태의 글이 없으면 섹션 건너뜀
+
+        // 섹션 헤더 (구분선 + 제목)
+        html += `
+        <div class="list-section-header">
+            <span class="list-section-title">${sec.label}</span>
+        </div>
+        `;
+
+        // 이 섹션 안 카드들
+        html += group.map(cardHtml).join("");
+    });
+
+    // 혹시 상태가 없거나 다른 값인 글이 있다면 마지막에 "기타"로 모음 (선택 사항)
+    const etcGroup = filtered.filter((it) => !sections.some((sec) => sec.status === (it.status || "")));
+    if (etcGroup.length) {
+        html += `
+        <div class="list-section-header">
+            <span class="list-section-title">기타 상태</span>
+        </div>
+        `;
+        html += etcGroup.map(cardHtml).join("");
+    }
+
+    wrap.innerHTML = html;
 }
 
 // 카드 클릭 시 상세 모달
@@ -276,6 +359,9 @@ function setupAuthUI() {
             avatar.style.display = "inline-block";
             avatar.src = user.photoURL || "";
             avatar.alt = user.displayName || "user";
+            
+            // ⭐ 로그인한 유저의 브라우저에 푸시 토큰 등록
+            registerFcmToken(user);
         } else {
             loginBtn.style.display = "inline-block";
             avatar.style.display = "none";
