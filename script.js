@@ -46,24 +46,39 @@ const messaging = getMessaging(app);
 // 특정 유저의 브라우저 FCM 토큰을 Firestore에 저장
 async function registerFcmToken(user) {
     try {
-        // 알림 권한 요청
+        // 1) 브라우저가 서비스워커를 지원하는지 확인
+        if (!("serviceWorker" in navigator)) {
+            console.log("이 브라우저는 Service Worker를 지원하지 않습니다.");
+            return;
+        }
+
+        // 2) 메신저용 서비스워커 등록 (루트 경로에 있는 파일)
+        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        console.log("서비스워커 등록 완료:", registration);
+
+        // 3) 알림 권한 요청
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
             console.log("알림 권한이 허용되지 않았습니다.");
             return;
         }
 
-        // Firebase Console > Cloud Messaging > Web Push 인증서에서 복사한 공개키
+        // 4) Firebase Console > Cloud Messaging > Web Push 인증서에서 복사한 공개키
         const vapidKey = "BNiszm8wR4AkRozXusasT3VrNII8CT2hNdVEFgAp3vPLQ4HwpJZ-YXKf1p5LBXOiIyF9Afl-sB7pTkdHoyRxD6Y";
 
-        const token = await getToken(messaging, { vapidKey });
+        // 5) 서비스워커 registration을 같이 넘겨서 토큰 발급
+        const token = await getToken(messaging, {
+            vapidKey,
+            serviceWorkerRegistration: registration
+        });
+
         if (!token) {
             console.log("FCM 토큰을 가져오지 못했습니다.");
             return;
         }
         console.log("FCM token:", token);
 
-        // 유저 uid 기준으로 토큰 저장/업데이트
+        // 6) 유저 uid 기준으로 토큰 저장/업데이트
         const uid = user.uid;
         await setDoc(doc(db, "fcmTokens", uid), {
             token,
@@ -74,16 +89,6 @@ async function registerFcmToken(user) {
     }
 }
 
-// 페이지가 열려 있을 때 오는 알림 처리 (선택, 있으면 편함)
-onMessage(messaging, (payload) => {
-    console.log("포그라운드 메시지:", payload);
-    const { title, body } = payload.notification || {};
-    if (Notification.permission === "granted") {
-        new Notification(title || "새 알림", {
-            body: body || ""
-        });
-    }
-});
 
 /* 2) 헬퍼 & 상태 */
 const $ = (sel, p = document) => p.querySelector(sel);
