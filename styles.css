@@ -1060,3 +1060,161 @@ textarea.control {
     display: flex;
     gap: 8px;
 }
+
+/* 인증/요청 박스 */
+.auth-actions {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #151515;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 13px;
+}
+
+.auth-actions .auth-help {
+    margin: 0 0 8px;
+    color: #bbbbbb;
+    line-height: 1.5;
+}
+
+.auth-actions small {
+    display: block;
+    margin-top: 4px;
+    color: #888;
+    font-size: 11px;
+}
+
+.auth-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+/* ───────── 인증 Q/A 뱃지 ───────── */
+.badge-auth {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    margin-left: 6px;
+    border-radius: 999px;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.badge-auth--question {
+    background: rgba(255, 200, 80, 0.12);
+    color: #ffcf6b;
+}
+
+.badge-auth--answer {
+    background: rgba(102, 204, 255, 0.12);
+    color: #8bd4ff;
+}
+
+/* 인증 상태 텍스트 (대기/승인/거절) */
+.auth-state {
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.auth-state--pending {
+    color: #ffb347;
+}
+
+.auth-state--accepted {
+    color: #7ddc84;
+}
+
+.auth-state--rejected {
+    color: #ff7a7a;
+}
+
+/* 승인/거절 버튼 줄 */
+.auth-verify {
+    margin-top: 4px;
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+/* ===========================
+   인박스 레이아웃 정리 (버튼 겹침 방지)
+   =========================== */
+
+.inbox-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: #1a1a1a;
+    align-items: flex-start;
+    position: relative; /* 카드 자체는 그대로 */
+}
+
+.inbox-item .content {
+    position: relative;
+    padding-bottom: 0; /* 예전 absolute 버튼용 여유 공간 제거 */
+}
+
+.inbox-actions {
+    position: static; /* 우하단 고정 해제 */
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end; /* 오른쪽 정렬만 유지 */
+}
+
+.inbox-reply {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.inbox-reply .textarea {
+    min-height: 70px;
+}
+
+/* 인증 승인/거절 버튼 줄 */
+.auth-verify {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* 전달 완료 버튼 줄 */
+.handover-actions {
+    margin-top: 6px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 전달 완료 상태 텍스트(있으면) */
+.handover-state {
+    margin-left: 4px;
+    font-size: 11px;
+    color: #8bd4ff;
+}
+
+/* 인증 답변 입력 영역 */
+.auth-answer-area {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.auth-answer-area .textarea {
+    min-height: 90px;
+}
+
+.auth-answer-area .btn-auth-answer-send {
+    align-self: flex-end;
+}
