@@ -161,4 +161,120 @@
         border-bottom: 1px solid #333;
         margin: 6px 0;
     }
+
+    /* ===========================
+       글 등록 페이지 모바일 튜닝
+       =========================== */
+
+    /* 컨테이너: 좌우 여백 조금만, 화면 폭에 맞게 */
+    .container {
+        max-width: 480px;
+        margin: 16px auto 40px;
+        padding: 0 12px 40px;
+    }
+
+    /* 글 등록 카드가 화면에 꽉 차게 */
+    .register-card {
+        width: 100%;
+        max-width: none;
+        padding: 16px 14px 18px;
+        border-radius: 14px;
+    }
+
+    /* 제목 "글 등록" 사이즈 살짝 키우기 */
+    .page-heading {
+        font-size: 20px;
+        margin: 6px 4px 16px;
+    }
+
+    /* 라벨 / 인풋 비율 보정 */
+    .form-field {
+        gap: 4px;
+    }
+
+    .label-title,
+    .label {
+        font-size: 13px;
+    }
+
+    /* 텍스트/셀렉트 박스 높이 조금 키우기 */
+    .control,
+    .input,
+    .select {
+        height: 44px;
+        padding: 0 12px;
+        font-size: 14px;
+    }
+
+    textarea.control,
+    .textarea {
+        min-height: 120px;
+        font-size: 14px;
+    }
+
+    /* 파일 업로드 박스도 한 줄로 보기 좋게 */
+    .file-drop {
+        height: 46px;
+        font-size: 14px;
+    }
+
+    .preview img {
+        width: 130px;
+        height: 96px;
+    }
+
+    .btn-row {
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+
+    .btn {
+        height: 38px;
+        padding: 0 14px;
+        font-size: 14px;
+    }
+
+    /* 체크박스 텍스트 줄간 간격 */
+    .toggle-box {
+        font-size: 13px;
+        gap: 6px;
+    }
+
+    /* ===========================
+       프로필 페이지 모바일 튜닝
+       =========================== */
+
+    /* 프로필 카드 너비를 화면에 맞게 */
+    .profile-container,
+    .profile-main,
+    .profile-card {
+        max-width: 480px;
+        margin: 16px auto 40px;
+        padding: 0 12px;
+    }
+
+    .profile-card {
+        width: 100%;
+        border-radius: 18px;
+        padding: 18px 16px 20px;
+    }
+
+    /* 프로필 안의 큰 아바타가 너무 커 보일 수 있으니 살짝 축소 */
+    .profile-card img,
+    .profile-avatar {
+        max-width: 220px;
+        max-height: 220px;
+    }
+
+    /* 프로필 정보 텍스트도 모바일 기준으로 줄이기 */
+    .profile-card .info-row {
+        font-size: 14px;
+    }
+
+    .profile-card .btn-row,
+    .profile-card .form-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+    }
 }
