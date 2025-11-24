@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
   </head>
   <body>
-    <!-- 상단 바 -->
     <header class="topbar">
       <div class="top-inner">
+        <!-- 햄버거 -->
         <button class="icon-btn hamburger" aria-label="메뉴 열기">
           <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="20" height="2" rx="1" fill="#bbb" />
@@ -21,12 +21,15 @@
           </svg>
         </button>
 
-        <a class="brand" href="index.html" aria-label="홈으로">
-          <span class="brand-text" style="font-weight: 700; letter-spacing: 0.4px">JUP</span>
+        <!-- 브랜드 -->
+        <a class="brand" href="index.html" aria-label="홈으로 이동">
+          <span class="brand-text">JUP</span>
         </a>
 
+        <!-- 검색창 대신 ‘빈 자리’만 두는 박스 (눈에는 안 보이는 여백) -->
         <div class="search-box search-box--empty"></div>
 
+        <!-- 로그인 / 프로필 영역 -->
         <div id="authArea">
           <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
           <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
@@ -123,6 +126,7 @@
     </main>
 
     <!-- profile.js는 ES module 방식 -->
+    <script type="module" src="script.js"></script>
     <script type="module" src="profile.js"></script>
     <script src="mobile-menu.js"></script>
   </body>
