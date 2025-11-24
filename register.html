@@ -55,6 +55,70 @@
                 max-width: 1100px;
                 margin-inline: auto;
             }
+
+            /* ===========================
+       모바일(폰) 전용 글 등록 레이아웃
+       =========================== */
+            @media (max-width: 768px) {
+                /* 페이지 전체 폭 줄이기 */
+                main.container {
+                    max-width: 480px;
+                    margin: 16px auto 40px;
+                    padding: 0 12px 40px;
+                }
+
+                /* 등록 카드가 화면 폭 거의 꽉 차게 */
+                .register-card {
+                    max-width: 100%;
+                    margin-inline: 0;
+                    border-radius: 16px;
+                    padding: 18px 14px 22px;
+                }
+
+                /* 한 줄에 하나씩 꽉 차게 */
+                .form-field {
+                    grid-column: span 12;
+                }
+
+                .page-heading {
+                    font-size: 20px;
+                    margin: 8px 4px 18px;
+                }
+
+                .form-grid {
+                    gap: 14px;
+                }
+
+                /* 입력창 / 셀렉트 높이 조금 키워서 손가락으로 누르기 편하게 */
+                .control {
+                    height: 44px;
+                    padding: 0 12px;
+                    font-size: 14px;
+                }
+
+                textarea.control {
+                    min-height: 120px;
+                    padding: 10px 12px;
+                    font-size: 14px;
+                }
+
+                .file-drop {
+                    height: 46px;
+                    font-size: 14px;
+                }
+
+                .btn-row {
+                    margin-top: 12px;
+                    justify-content: flex-end;
+                    gap: 8px;
+                }
+
+                .btn {
+                    height: 38px;
+                    padding: 0 14px;
+                    font-size: 14px;
+                }
+            }
         </style>
     </head>
     <body>
@@ -129,7 +193,7 @@
                 <button type="button" class="mobile-menu-item" id="mobileMailBtn">메일함</button>
             </div>
         </div>
-        
+
         <main class="container">
             <section class="hero">
                 <p class="hero-text">사진과 기본 정보만 입력하면 등록 완료!</p>
@@ -245,4 +309,3 @@
         <script src="mobile-menu.js"></script>
     </body>
 </html>
-ㄴ
