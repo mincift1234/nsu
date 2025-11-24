@@ -8,6 +8,7 @@
             href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap"
             rel="stylesheet" />
         <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
         <!-- Firebase config: register 페이지에서도 반드시 필요 -->
 
         <!-- 이 페이지에서만 쓰는 아주 작은 보조 스타일(사이트 톤 유지) -->
@@ -103,6 +104,32 @@
             </div>
         </header>
 
+        <!-- 모바일 햄버거 메뉴 슬라이드 -->
+        <div class="mobile-menu-wrap">
+            <div class="mobile-menu-overlay"></div>
+
+            <div class="mobile-menu">
+                <button class="close-menu" aria-label="메뉴 닫기">✕</button>
+
+                <div class="mobile-menu-section">
+                    <input
+                        type="search"
+                        id="mobileSearchInput"
+                        class="mobile-search"
+                        placeholder="분실물 검색"
+                        aria-label="분실물 검색" />
+                </div>
+
+                <hr />
+
+                <button type="button" class="mobile-menu-item" id="mobileWriteBtn">글쓰기</button>
+
+                <hr />
+
+                <button type="button" class="mobile-menu-item" id="mobileMailBtn">메일함</button>
+            </div>
+        </div>
+        
         <main class="container">
             <section class="hero">
                 <p class="hero-text">사진과 기본 정보만 입력하면 등록 완료!</p>
@@ -215,5 +242,7 @@
         </main>
 
         <script type="module" src="register.js"></script>
+        <script src="mobile-menu.js"></script>
     </body>
 </html>
+ㄴ
