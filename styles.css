@@ -1045,13 +1045,23 @@ textarea.control {
     gap: 8px;
     margin-top: 6px;
 }
+/* 쪽지 답장 영역 – 세로 정렬로 깔끔하게 */
 .inbox-reply {
     display: flex;
-    gap: 6px;
-    margin-top: 6px;
+    flex-direction: column; /* 가로 → 세로로 변경 */
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 8px;
 }
 .inbox-reply .textarea {
-    min-height: 70px;
+    width: 100%;
+    min-height: 90px;
+    box-sizing: border-box;
+}
+/* 답장 보내기 버튼은 우측 정렬 느낌 */
+.inbox-reply button,
+.inbox-reply .chip {
+    align-self: flex-end;
 }
 
 /* 인박스 카드: 버튼을 카드 우하단 고정 */
