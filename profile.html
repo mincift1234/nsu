@@ -10,30 +10,32 @@
     <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
   </head>
   <body>
+    <!-- 상단 바 -->
     <header class="topbar">
       <div class="top-inner">
-        <div class="left-group">
-          <button class="icon-btn hamburger" aria-label="메뉴 열기" id="menuBtn">
-            <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="20" height="2" rx="1" fill="#fff" />
-              <rect y="6" width="20" height="2" rx="1" fill="#fff" />
-              <rect y="12" width="20" height="2" rx="1" fill="#fff" />
-            </svg>
-          </button>
+        <button class="icon-btn hamburger" aria-label="메뉴 열기">
+          <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="20" height="2" rx="1" fill="#bbb" />
+            <rect y="6" width="20" height="2" rx="1" fill="#bbb" />
+            <rect y="12" width="20" height="2" rx="1" fill="#bbb" />
+          </svg>
+        </button>
 
-          <a class="brand" href="index.html" aria-label="홈으로 이동">
-            <span class="brand-text">JUP</span>
-          </a>
-        </div>
+        <a class="brand" href="index.html" aria-label="홈으로">
+          <span class="brand-text" style="font-weight: 700; letter-spacing: 0.4px">JUP</span>
+        </a>
 
-        <div class="center-group"></div>
+        <div class="search-box search-box--empty"></div>
 
-        <div class="right-group">
-          <!-- 헤더 아바타 / 로그인 버튼 -->
-          <button id="userBtn" aria-label="사용자" title="프로필" style="display: none">
-            <img id="userAvatar" alt="프로필" src="" />
-          </button>
-          <button id="loginBtn" class="chip" style="display: none">Google 로그인</button>
+        <div id="authArea">
+          <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
+          <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
+          <div id="profileMenu" class="hidden" aria-hidden="true">
+            <ul>
+              <li id="profile-info"><a href="profile.html">내 정보</a></li>
+              <li id="profile-logout">로그아웃</li>
+            </ul>
+          </div>
         </div>
       </div>
     </header>
