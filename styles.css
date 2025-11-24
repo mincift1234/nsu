@@ -1253,3 +1253,39 @@ textarea.control {
     font-weight: 700;
     color: #ddd;
 }
+
+/* ===========================
+   인박스: 답장 영역은 항상 아래로
+   =========================== */
+
+/* 카드 전체는 2열 그리드: [썸네일][내용] + 아래 한 줄 전체가 답장 */
+.inbox-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 8px;
+    align-items: flex-start;
+}
+
+/* 답장 영역을 항상 새 줄 + 전체 폭 차지 */
+.inbox-reply {
+    grid-column: 1 / -1; /* 두 컬럼 전체 span */
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column; /* textarea 위, 버튼 아래 */
+    align-items: stretch;
+    gap: 6px;
+}
+
+/* 답장 textarea는 카드 폭 100% */
+.inbox-reply .textarea {
+    width: 100%;
+    min-height: 90px;
+    box-sizing: border-box;
+}
+
+/* 보내기 버튼은 오른쪽 정렬 느낌 */
+.inbox-reply button,
+.inbox-reply .chip {
+    align-self: flex-end;
+}
