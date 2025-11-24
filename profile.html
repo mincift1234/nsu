@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="profile.css" />
+    <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
   </head>
   <body>
     <header class="topbar">
@@ -36,6 +37,32 @@
         </div>
       </div>
     </header>
+
+    <!-- 모바일 햄버거 메뉴 슬라이드 -->
+    <div class="mobile-menu-wrap">
+      <div class="mobile-menu-overlay"></div>
+
+      <div class="mobile-menu">
+        <button class="close-menu" aria-label="메뉴 닫기">✕</button>
+
+        <div class="mobile-menu-section">
+          <input
+            type="search"
+            id="mobileSearchInput"
+            class="mobile-search"
+            placeholder="분실물 검색"
+            aria-label="분실물 검색" />
+        </div>
+
+        <hr />
+
+        <button type="button" class="mobile-menu-item" id="mobileWriteBtn">글쓰기</button>
+
+        <hr />
+
+        <button type="button" class="mobile-menu-item" id="mobileMailBtn">메일함</button>
+      </div>
+    </div>
 
     <main class="main-content">
       <h2 class="page-title profile-title">내 정보</h2>
@@ -95,5 +122,6 @@
 
     <!-- profile.js는 ES module 방식 -->
     <script type="module" src="profile.js"></script>
+    <script src="mobile-menu.js"></script>
   </body>
 </html>
