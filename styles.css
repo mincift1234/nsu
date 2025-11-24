@@ -39,6 +39,15 @@ body {
     font-size: 14px;
 }
 
+/* 데스크탑 기본: 모바일 메뉴/햄버거는 숨김 */
+.mobile-menu-wrap {
+    display: none;
+}
+
+.hamburger {
+    display: none;
+}
+
 /* Topbar */
 .topbar {
     position: sticky;
