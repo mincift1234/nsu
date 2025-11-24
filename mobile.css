@@ -1,0 +1,164 @@
+/* mobile.css */
+/* 768px 이하에서만 적용 */
+@media (max-width: 768px) {
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    /* 상단바: 좌측 햄버거 + JUP, 우측 로그인 영역 */
+    .top-inner {
+        padding: 0 12px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start; /* 왼쪽 정렬 후 오른쪽 영역만 밀기 */
+        gap: 6px;
+    }
+
+    .brand-text {
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    /* 가운데 검색박스 / 글쓰기 / 쪽지 아이콘은 모바일에선 숨김 */
+    .search-box,
+    #addBtn,
+    #inboxBtn {
+        display: none !important;
+    }
+
+    /* 햄버거 버튼은 모바일에서만 보이게 */
+    .hamburger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+
+    .hamburger svg rect {
+        fill: #fff;
+    }
+
+    /* 오른쪽 로그인/프로필 영역을 맨 오른쪽으로 밀기 */
+    #authArea,
+    .right-group {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    #loginBtn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    /* 헤더 프로필 아이콘 (조금 줄이기) */
+    #userAvatar,
+    #userBtn img {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* ---------- 모바일 메뉴 슬라이드 ---------- */
+
+    .mobile-menu-wrap {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+    }
+
+    .mobile-menu-wrap.active {
+        display: block;
+    }
+
+    .mobile-menu-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .mobile-menu {
+        position: absolute;
+        left: 0; /* ⬅ 왼쪽에서 열리게 */
+        top: 0;
+        width: 72%;
+        max-width: 320px;
+        height: 100%;
+        background: #181818;
+        padding: 20px 18px;
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        transform: translateX(-100%);
+        animation: slideIn 0.25s ease forwards;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .close-menu {
+        align-self: flex-end;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        margin-bottom: 12px;
+    }
+
+    .mobile-menu-section {
+        margin-bottom: 8px;
+    }
+
+    .mobile-search {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #202020;
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .mobile-search::placeholder {
+        color: #888;
+    }
+
+    .mobile-menu-item {
+        width: 100%;
+        text-align: center; /* 중앙 정렬 */
+        padding: 10px 2px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .mobile-menu-item:hover {
+        color: #ffd66b;
+    }
+
+    .mobile-menu hr {
+        border: none;
+        border-bottom: 1px solid #333;
+        margin: 6px 0;
+    }
+}
