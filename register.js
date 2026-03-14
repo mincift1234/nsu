@@ -21,6 +21,21 @@ import {
     getDoc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+async function checkPhoneVerified(user) {
+    const snap = await getDoc(doc(db, "users", user.uid));
+
+    if (!snap.exists() || !snap.data().phoneVerified) {
+        alert("전화번호 인증 후 이용 가능합니다.");
+
+        location.href = "phone.html";
+
+        return false;
+    }
+
+    return true;
+}
+
 import {
     getStorage,
     ref as sRef,
@@ -285,8 +300,10 @@ form?.addEventListener("submit", async (e) => {
         } catch {
             return;
         }
-        if (!auth.currentUser) return;
     }
+
+    const ok = await checkPhoneVerified(auth.currentUser);
+    if (!ok) return;
 
     // 값 수집/검증
     const title = (titleEl.value || "").trim();
@@ -357,3 +374,11 @@ form?.addEventListener("submit", async (e) => {
         setBusy(false);
     }
 });
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").catch(function (err) {
+            console.error("Service Worker 등록 실패:", err);
+        });
+    });
+}
