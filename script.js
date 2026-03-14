@@ -21,6 +21,7 @@ import {
     serverTimestamp,
     deleteDoc,
     doc,
+    getDoc,
     updateDoc,
     setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
@@ -88,7 +89,6 @@ async function registerFcmToken(user) {
         console.error("FCM 토큰 등록 실패:", err);
     }
 }
-
 
 /* 2) 헬퍼 & 상태 */
 const $ = (sel, p = document) => p.querySelector(sel);
@@ -175,7 +175,6 @@ function pickOwnerUid(it) {
     return it?.ownerUid || it?.uid || it?.authorUid || (it?.owner && it.owner.uid) || (it?.user && it.user.uid) || null;
 }
 
-/* 4) 렌더 */
 /* 4) 렌더 */
 function renderList() {
     const wrap = $("#listings");
@@ -364,7 +363,20 @@ function setupAuthUI() {
             avatar.style.display = "inline-block";
             avatar.src = user.photoURL || "";
             avatar.alt = user.displayName || "user";
-            
+
+            async function checkPhoneVerification(user) {
+                const snap = await getDoc(doc(db, "users", user.uid));
+
+                if (!snap.exists() || !snap.data().phoneVerified) {
+                    setTimeout(() => {
+                        if (confirm("서비스 이용을 위해 전화번호 인증이 필요합니다.\n지금 인증하시겠습니까?")) {
+                            window.location.href = "phone.html";
+                        }
+                    }, 800);
+                }
+            }
+
+            checkPhoneVerification(user);
             // ⭐ 로그인한 유저의 브라우저에 푸시 토큰 등록
             registerFcmToken(user);
         } else {
@@ -378,8 +390,22 @@ function setupAuthUI() {
 
 // 등록 버튼 → register.html로 이동 → 다음주에 할 예정이라 ppt에 X, 이 코드 빼고 다 ppt에 넣으면 될 듯
 function setupAddButton() {
-    $("#addBtn")?.addEventListener("click", () => {
-        if (!auth.currentUser) return alert("Google 로그인 후 등록할 수 있어요.");
+    $("#addBtn")?.addEventListener("click", async () => {
+        if (!auth.currentUser) {
+            alert("Google 로그인 후 등록할 수 있어요.");
+            return;
+        }
+
+        const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+
+        if (!snap.exists() || !snap.data().phoneVerified) {
+            alert("전화번호 인증 후 글 등록이 가능합니다.");
+
+            location.href = "phone.html";
+
+            return;
+        }
+
         location.href = "register.html";
     });
 }
@@ -581,6 +607,15 @@ function openItemModal(it) {
     msgInput.value = "";
 
     msgSend.onclick = async () => {
+        const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+
+        if (!snap.exists() || !snap.data().phoneVerified) {
+            alert("전화번호 인증 후 쪽지 이용이 가능합니다.");
+
+            location.href = "phone.html";
+
+            return;
+        }
         const text = (document.getElementById("msgInput")?.value || "").trim();
         if (!text) return alert("쪽지 내용을 입력하세요.");
         if (!auth.currentUser) {
@@ -1070,3 +1105,11 @@ inboxBtn?.addEventListener("click", async () => {
 onAuthStateChanged(auth, () => {
     loadInboxCount();
 });
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").catch(function (err) {
+            console.error("Service Worker 등록 실패:", err);
+        });
+    });
+}
