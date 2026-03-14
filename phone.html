@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전화번호 인증 — JUP</title>
+
+<link rel="stylesheet" href="styles.css">
+
+<style>
+
+.container{
+max-width:420px;
+margin:80px auto;
+padding:24px;
+background:#1e1e1e;
+border-radius:12px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:8px;
+margin-bottom:12px;
+background:#111;
+color:white;
+border:1px solid #333;
+border-radius:6px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#ff7a00;
+border:none;
+border-radius:8px;
+color:white;
+font-weight:600;
+cursor:pointer;
+}
+
+#recaptcha{
+margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>전화번호 인증</h2>
+
+<input id="phoneInput" placeholder="01012345678">
+
+<button id="sendBtn">
+인증번호 받기
+</button>
+
+<input id="codeInput" placeholder="인증번호">
+
+<button id="verifyBtn">
+인증 완료
+</button>
+
+<div id="recaptcha"></div>
+
+</div>
+
+<script type="module" src="phone.js"></script>
+
+</body>
+</html>
