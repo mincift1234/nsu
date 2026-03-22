@@ -33,7 +33,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyCpE_MfBizTqyY2v_cQOrBX4q6KhIi5mrk",
     authDomain: "something-e578a.firebaseapp.com",
     projectId: "something-e578a",
-    storageBucket: "something-e578a.appspot.com",
+    storageBucket: "something-e578a.firebasestorage.app",
     messagingSenderId: "879471143827",
     appId: "1:879471143827:web:33e2c1001e051f05265666",
     measurementId: "G-RHRK7NJ1FN"
@@ -144,6 +144,46 @@ document.addEventListener("DOMContentLoaded", () => {
         if (displayNameInput) displayNameInput.value = user.displayName || "";
         if (userEmailEl) userEmailEl.textContent = user.email || "-";
         if (createdAtEl) createdAtEl.textContent = user.metadata?.creationTime || "-";
+        if (displayNameInput) {
+            displayNameInput.value = user.displayName || "";
+
+            // 기존 배지가 있으면 중복 생성 방지용으로 먼저 삭제
+            const oldBadge = document.getElementById("verifiedBadge");
+            if (oldBadge) oldBadge.remove();
+
+            // users 문서 기준 전화번호 인증 여부 확인
+            getDoc(doc(db, "users", user.uid))
+                .then((userSnap) => {
+                    if (!userSnap.exists()) return;
+                    if (!userSnap.data().phoneVerified) return;
+
+                    const badge = document.createElement("span");
+                    badge.id = "verifiedBadge";
+                    badge.textContent = "인증 완료";
+                    badge.style.marginLeft = "8px";
+                    badge.style.padding = "4px 8px";
+                    badge.style.borderRadius = "999px";
+                    badge.style.background = "rgba(76, 175, 80, 0.15)";
+                    badge.style.color = "#63d471";
+                    badge.style.fontSize = "12px";
+                    badge.style.fontWeight = "700";
+                    badge.style.display = "inline-flex";
+                    badge.style.alignItems = "center";
+                    badge.style.whiteSpace = "nowrap";
+
+                    // 닉네임 input이 들어있는 dd 뒤에 배지 추가
+                    const parent = displayNameInput.parentElement;
+                    if (parent) {
+                        parent.style.display = "flex";
+                        parent.style.alignItems = "center";
+                        parent.style.gap = "8px";
+                        parent.appendChild(badge);
+                    }
+                })
+                .catch((err) => {
+                    console.warn("phoneVerified badge load failed:", err);
+                });
+        }
         document.dispatchEvent(
             new CustomEvent("profile-updated", {
                 detail: { photoURL: currentPhoto, displayName: user.displayName || "" }
@@ -325,4 +365,12 @@ async function ensureUserDocWithOriginalPhoto(user) {
         console.error("ensureUserDoc error:", err);
         return null;
     }
+}
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").catch(function (err) {
+            console.error("Service Worker 등록 실패:", err);
+        });
+    });
 }
