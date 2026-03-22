@@ -517,6 +517,9 @@ function openItemModal(it) {
                 if (!toUid) return alert("작성자 정보가 없습니다.");
                 if (toUid === fromUid) return alert("자기 글에는 인증을 보낼 수 없습니다.");
 
+                const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                const isVerified = userSnap.exists() && userSnap.data().phoneVerified;
+
                 try {
                     await addDoc(collection(db, "messages"), {
                         toUid,
@@ -532,7 +535,8 @@ function openItemModal(it) {
                         itemThumb: (it.images && it.images[0]) || "",
                         type: "auth_answer", // 인증 설명
                         role: "owner", // "나는 주인이다" 주장
-                        authStatus: "pending" // 추후 'accepted' / 'rejected'로 확장 예정
+                        authStatus: "pending",
+                        senderVerified: isVerified // 추후 'accepted' / 'rejected'로 확장 예정
                     });
                     authDesc.value = "";
                     alert("인증 설명을 보냈습니다. 상대가 내용을 보고 확인할 거예요.");
@@ -580,6 +584,9 @@ function openItemModal(it) {
                     "이 물건을 제가 발견한 것 같습니다. 카드번호나 주민등록번호 같은 민감한 정보는 제외하고, " +
                     "물건의 색깔, 특징, 안에 들어있던 물건 등을 설명해 주시면 실제 분실물인지 확인해 보겠습니다.";
 
+                const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                const isVerified = userSnap.exists() && userSnap.data().phoneVerified;
+
                 try {
                     await addDoc(collection(db, "messages"), {
                         toUid,
@@ -595,7 +602,8 @@ function openItemModal(it) {
                         itemThumb: (it.images && it.images[0]) || "",
                         type: "auth_question", // 생김새 설명 요청
                         role: "finder", // "나는 습득자다" 주장
-                        authStatus: "pending"
+                        authStatus: "pending",
+                        senderVerified: isVerified
                     });
                     alert("생김새 설명을 요청하는 쪽지를 보냈습니다.");
                     loadInboxCount();
@@ -650,6 +658,9 @@ function openItemModal(it) {
             senderName = ""; // 닉네임 숨김
         }
 
+        const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+        const isVerified = userSnap.exists() && userSnap.data().phoneVerified;
+
         try {
             await addDoc(collection(db, "messages"), {
                 toUid,
@@ -665,7 +676,8 @@ function openItemModal(it) {
                 itemThumb: (it.images && it.images[0]) || "",
                 type: "normal", // 일반 쪽지
                 role: "normal",
-                authStatus: null
+                authStatus: null,
+                senderVerified: isVerified
             });
             document.getElementById("msgInput").value = "";
             alert("보냈습니다.");
@@ -721,6 +733,21 @@ async function loadInbox() {
         listEl.innerHTML = rows
             .map((m) => {
                 const who = m.isAnon ? m.anonLabel || "익명" : m.senderName || "닉네임 없음";
+
+                let verifiedBadge = "";
+
+                if (!m.isAnon && m.senderVerified) {
+                    verifiedBadge = `<span style="
+        margin-left:6px;
+        padding:2px 6px;
+        border-radius:999px;
+        background:rgba(76,175,80,0.15);
+        color:#63d471;
+        font-size:11px;
+        font-weight:700;
+    ">인증</span>`;
+                }
+
                 const ts = m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000).toLocaleString() : "";
                 const type = m.type || "normal"; // normal / auth_question / auth_answer / handover_info ...
                 const authStatus = m.authStatus || null; // pending / accepted / rejected / null
@@ -809,7 +836,7 @@ async function loadInbox() {
           <div class="content" style="flex:1">
             <p class="title">${m.itemTitle || "제목 없음"}</p>
             <p class="meta">
-              ${who} · ${ts}
+              ${who} ${verifiedBadge} · ${ts}
               ${typeBadgeHtml}
               ${authStateHtml}
             </p>
@@ -879,6 +906,9 @@ async function loadInbox() {
                     authStatus = "pending"; // 습득자가 확인 전
                 }
 
+                const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                const isVerified = userSnap.exists() && userSnap.data().phoneVerified;
+
                 try {
                     await addDoc(collection(db, "messages"), {
                         toUid,
@@ -894,7 +924,8 @@ async function loadInbox() {
                         itemThumb: wrap.dataset.thumb || "",
                         type: msgType,
                         role,
-                        authStatus
+                        authStatus,
+                        senderVerified: isVerified
                     });
                     wrap.querySelector(".rp-text").value = "";
                     alert("보냈습니다.");
@@ -952,6 +983,9 @@ async function loadInbox() {
                         authVerifiedOwnerUid: ownerUid
                     });
 
+                    const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                    const isVerified = userSnap.exists() && userSnap.data().phoneVerified;
+
                     // 3) 전달 위치/시간 안내 쪽지를 추가로 보내기 (입력했을 때만)
                     if (extra) {
                         const fromUid = auth.currentUser.uid;
@@ -969,7 +1003,8 @@ async function loadInbox() {
                             itemThumb: wrap.dataset.thumb || "",
                             type: "handover_info",
                             role: "finder",
-                            authStatus: null
+                            authStatus: null,
+                            senderVerified: isVerified
                         });
                     }
 
@@ -1043,6 +1078,9 @@ async function loadInbox() {
                 if (!text) return alert("생김새 설명을 입력해주세요.");
                 if (!auth.currentUser) return alert("로그인이 필요합니다.");
 
+                const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                const isVerified = userSnap.exists() && userSnap.data().phoneVerified;
+
                 try {
                     await addDoc(collection(db, "messages"), {
                         toUid,
@@ -1058,7 +1096,8 @@ async function loadInbox() {
                         itemThumb: wrap.dataset.thumb || "",
                         type: "auth_answer",
                         role: "owner",
-                        authStatus: "pending"
+                        authStatus: "pending",
+                        senderVerified: isVerified
                     });
 
                     alert("생김새 설명을 보냈습니다.");
