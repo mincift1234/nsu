@@ -178,6 +178,9 @@ function pickOwnerUid(it) {
 /* 4) 렌더 */
 function renderList() {
     const wrap = $("#listings");
+
+    if (!wrap) return;
+
     const q = state.q.trim().toLowerCase();
     const cat = state.cat;
 
@@ -274,8 +277,10 @@ async function fetchItems() {
         renderList();
     } catch (e) {
         console.error(e);
-        $("#listings").innerHTML =
-            `<div style="grid-column:1 / -1; color:#f88; padding:24px;">목록을 불러오지 못했습니다.</div>`;
+        if ($("#listings")) {
+            $("#listings").innerHTML =
+                `<div style="grid-column:1 / -1; color:#f88; padding:24px;">목록을 불러오지 못했습니다.</div>`;
+        }
     }
 }
 
@@ -417,7 +422,9 @@ function init() {
     setupAuthUI();
     setupProfileMenu();
     setupAddButton();
-    fetchItems(); // 게스트 상태에서도 읽기 허용 시 즉시 렌더
+    if (document.getElementById("listings")) {
+        fetchItems(); // 🔥 조건 추가
+    } // 게스트 상태에서도 읽기 허용 시 즉시 렌더
 }
 document.addEventListener("DOMContentLoaded", init);
 
