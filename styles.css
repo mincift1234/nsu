@@ -902,6 +902,8 @@ textarea.control {
     border-radius: 12px;
     box-shadow: var(--card-shadow);
     padding: 16px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* 넓은 화면에서도 과도하게 넓어지지 않도록 보수적으로 */
