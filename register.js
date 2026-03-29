@@ -184,11 +184,17 @@ function setBusy(on) {
 // ─────────────────────────────────────────────
 //  이미지 프리뷰(단일 파일)
 // ─────────────────────────────────────────────
-imageInput?.addEventListener("change", () => {
+async function renderPreview(file, applyMosaic = false) {
     preview.innerHTML = "";
-    const f = imageInput.files?.[0];
-    if (!f) return;
-    const url = URL.createObjectURL(f);
+    if (!file) return;
+
+    let previewFile = file;
+
+    if (applyMosaic) {
+        previewFile = await makeMosaicImage(file);
+    }
+
+    const url = URL.createObjectURL(previewFile);
     const img = new Image();
     img.src = url;
     img.style.width = "140px";
@@ -197,6 +203,16 @@ imageInput?.addEventListener("change", () => {
     img.style.borderRadius = "10px";
     img.style.boxShadow = "0 6px 16px rgba(0,0,0,.35)";
     preview.appendChild(img);
+}
+
+imageInput?.addEventListener("change", async () => {
+    const f = imageInput.files?.[0];
+    await renderPreview(f, !!mosaicToggle?.checked);
+});
+
+mosaicToggle?.addEventListener("change", async () => {
+    const f = imageInput.files?.[0];
+    await renderPreview(f, !!mosaicToggle?.checked);
 });
 
 // ─────────────────────────────────────────────
@@ -205,15 +221,71 @@ imageInput?.addEventListener("change", () => {
 //  - 파일이 있으면 Storage 업로드 후 [url] 반환
 //  - 모자이크 옵션은 서버/클라이언트 전처리가 없으면 그대로 업로드
 // ─────────────────────────────────────────────
-async function uploadImageIfNeeded(/* applyMosaic */) {
+async function uploadImageIfNeeded(applyMosaic) {
     const f = imageInput?.files?.[0];
     if (!f) return [];
+
+    let fileToUpload = f;
+
+    if (applyMosaic) {
+        fileToUpload = await makeMosaicImage(f);
+    }
+
     const uid = (auth.currentUser && auth.currentUser.uid) || "anon";
-    const path = `items/${uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
+    const safeName = fileToUpload.name || f.name || "image.jpg";
+    const path = `items/${uid}/${Date.now()}_${encodeURIComponent(safeName)}`;
     const ref = sRef(storage, path);
-    await uploadBytes(ref, f);
+
+    await uploadBytes(ref, fileToUpload);
     const url = await getDownloadURL(ref);
     return [url];
+}
+
+async function makeMosaicImage(file) {
+    const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+
+    const img = await new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = dataUrl;
+    });
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // 원본을 먼저 그림
+    ctx.drawImage(img, 0, 0);
+
+    // 모자이크 강도
+    const blockSize = Math.max(8, Math.floor(Math.min(img.width, img.height) / 25));
+
+    for (let y = 0; y < canvas.height; y += blockSize) {
+        for (let x = 0; x < canvas.width; x += blockSize) {
+            const w = Math.min(blockSize, canvas.width - x);
+            const h = Math.min(blockSize, canvas.height - y);
+
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            ctx.fillStyle = `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, 1)`;
+            ctx.fillRect(x, y, w, h);
+        }
+    }
+
+    const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", 0.9);
+    });
+
+    return new File([blob], `mosaic_${file.name.replace(/\.[^.]+$/, "")}.jpg`, {
+        type: "image/jpeg"
+    });
 }
 
 // ─────────────────────────────────────────────
