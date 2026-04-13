@@ -143,6 +143,46 @@ function statusClass(s) {
     }
 }
 
+function postTypeLabel(it) {
+    return it?.dateType === "lost" ? "분실 신고" : "습득 신고";
+}
+
+function cardSummary(it) {
+    const raw = String(it?.description || "").replace(/\s+/g, " ").trim();
+    if (!raw) return `${it?.category || "기타"} 카테고리 등록 글`;
+    return raw.length > 58 ? `${raw.slice(0, 58)}...` : raw;
+}
+
+function normalizeText(value) {
+    return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function escapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function updateHeroStats(items = state.items) {
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(value);
+    };
+
+    const total = items.length;
+    const holding = items.filter((it) => (it.status || "") === "보관중").length;
+    const finding = items.filter((it) => (it.status || "") === "찾는중").length;
+
+    setText("heroTotal", total);
+    setText("heroHolding", holding);
+    setText("heroFinding", finding);
+}
+
 // sender 표시 모드 읽기
 function getSenderMode() {
     const el = document.querySelector('input[name="senderMode"]:checked');
@@ -192,6 +232,8 @@ function renderList() {
         return mt && mc;
     });
 
+    updateHeroStats(filtered);
+
     if (!filtered.length) {
         wrap.innerHTML = `<div style="grid-column:1 / -1; color:#aaa; padding:24px;">검색 조건에 맞는 결과가 없어요.</div>`;
         return;
@@ -199,23 +241,31 @@ function renderList() {
 
     // 섹션 순서 정의
     const sections = [
-        { status: "보관중", label: "🟢 발견한 글" },
-        { status: "찾는중", label: "🟠 찾는 글" },
-        { status: "완료", label: "⚪ 완료된 글" }
+        { status: "보관중", label: "발견한 글" },
+        { status: "찾는중", label: "찾는 글" },
+        { status: "완료", label: "완료된 글" }
     ];
 
-    // 카드 HTML 만드는 함수 (기존 카드 모양 그대로)
+    // 카드 HTML
     const cardHtml = (it) => `
     <article class="card" data-id="${it.id}">
       <figure class="thumb">
         <img src="${(it.images && it.images[0]) || "https://picsum.photos/seed/placeholder/800/600"}" alt="${it.title || "분실물"}" loading="lazy">
       </figure>
       <div class="card-body">
+        <div class="card-topline">
+          <p class="status-badge ${statusClass(it.status)}">${it.status || "상태 미상"}</p>
+          <p class="card-time">${timeAgoAny(it.eventAt || it.lostAt || it.foundAt || it.createdAt)}</p>
+        </div>
         <h3 class="title">${it.title || "제목 없음"}</h3>
-        <p class="price">${it.priceText || (it.reward ? "보상 있음" : "문의")}</p>
-        <p class="status-badge ${statusClass(it.status)}">${it.status || "상태 미상"}</p>
-        <p class="meta">
-          ${it.location || "위치 미상"} · ${it.dateType === "lost" ? "분실" : "습득"} ${timeAgoAny(it.eventAt || it.lostAt || it.foundAt || it.createdAt)}
+        <p class="card-summary">${cardSummary(it)}</p>
+        <div class="card-tags">
+          <span class="card-tag">${it.category || "기타"}</span>
+          <span class="card-tag card-tag--soft">${postTypeLabel(it)}</span>
+        </div>
+        <p class="card-meta">
+          <span class="card-meta-label">위치</span>
+          <span class="card-meta-value">${it.location || "위치 미상"}</span>
         </p>
       </div>
     </article>
@@ -436,11 +486,30 @@ document.getElementById("addBtn")?.addEventListener("click", (e) => {
 
 function openItemModal(it) {
     (document.getElementById("mImg") || {}).src = (it.images && it.images[0]) || "";
-    (document.getElementById("mTitle") || {}).textContent = it.title || "제목 없음";
+    const titleEl = document.getElementById("mTitle");
+    const metaEl = document.getElementById("mMeta");
+    const descEl = document.getElementById("mDesc");
+    if (titleEl) titleEl.textContent = it.title || "제목 없음";
     const when = timeAgoAny(it.eventAt || it.lostAt || it.foundAt || it.createdAt);
-    (document.getElementById("mMeta") || {}).textContent =
-        `${it.location || "위치 미상"} · ${it.dateType === "lost" ? "분실" : "습득"} ${when} · ${it.status || "상태 미상"}`;
-    (document.getElementById("mDesc") || {}).textContent = it.description || "";
+    if (metaEl) {
+        metaEl.innerHTML = `
+            <span class="modal-meta-chip">${escapeHtml(it.location || "위치 미상")}</span>
+            <span class="modal-meta-chip">${escapeHtml(postTypeLabel(it))}</span>
+            <span class="modal-meta-chip">${escapeHtml(it.status || "상태 미상")}</span>
+            <span class="modal-meta-chip modal-meta-chip--muted">${escapeHtml(when)}</span>
+        `;
+    }
+    if (descEl) {
+        const desc = normalizeText(it.description);
+        const title = normalizeText(it.title);
+        if (!desc || desc === title) {
+            descEl.textContent = "";
+            descEl.style.display = "none";
+        } else {
+            descEl.textContent = it.description || "";
+            descEl.style.display = "";
+        }
+    }
 
     const me = (auth.currentUser && auth.currentUser.uid) || null;
     const owner = pickOwnerUid(it); // 글 작성자 uid
@@ -484,6 +553,7 @@ function openItemModal(it) {
             authBox.style.display = "block";
             authBox.innerHTML = `
                 <div class="auth-section">
+                    <p class="auth-title">소유 확인 요청</p>
                     <p class="auth-help">
                         이 물건의 주인이라고 생각된다면, 물건의 생김새와 특징을 자세히 적어서 인증을 보내주세요.
                         <small>예: 색깔, 브랜드, 안에 들어있던 물건 등 (주민등록번호/계좌번호/카드번호는 절대 적지 마세요)</small>
@@ -491,7 +561,7 @@ function openItemModal(it) {
                     <textarea id="authDesc" class="textarea" rows="3"
                         placeholder="예: 검은색 지갑, 안쪽에 파란색 학생증과 현금 5천원, 바깥쪽 오른쪽 아래에 작은 흠집이 있음"></textarea>
                     <div class="auth-actions-row">
-                        <button id="authSend" class="chip">이 물건의 주인입니다 (인증 보내기)</button>
+                        <button id="authSend" class="chip auth-submit-btn">소유 확인 보내기</button>
                     </div>
                 </div>
             `;
@@ -552,13 +622,12 @@ function openItemModal(it) {
             authBox.style.display = "block";
             authBox.innerHTML = `
                 <div class="auth-section">
+                    <p class="auth-title">습득자 확인 요청</p>
                     <p class="auth-help">
                         이 물건을 실제로 발견했다면, 분실자에게 물건의 생김새를 설명해 달라고 요청할 수 있습니다.
                     </p>
                     <div class="auth-actions-row">
-                        <button id="authAsk" class="chip chip--ghost">
-                            이 물건을 발견했습니다 (생김새 요청 보내기)
-                        </button>
+                        <button id="authAsk" class="chip chip--ghost auth-submit-btn">생김새 요청 보내기</button>
                     </div>
                 </div>
             `;
@@ -711,10 +780,10 @@ document.querySelectorAll(".modal").forEach((mod) => {
 async function loadInbox() {
     const listEl = document.getElementById("inboxList");
     if (!auth.currentUser) {
-        listEl.innerHTML = `<div class="muted">로그인이 필요합니다.</div>`;
+        listEl.innerHTML = `<div class="inbox-empty">로그인 후 받은 쪽지를 확인할 수 있습니다.</div>`;
         return;
     }
-    listEl.innerHTML = `<div class="muted">불러오는 중.</div>`;
+    listEl.innerHTML = `<div class="inbox-empty">쪽지를 불러오는 중입니다.</div>`;
 
     try {
         const snap = await getDocs(collection(db, "messages"));
@@ -726,7 +795,7 @@ async function loadInbox() {
             .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
         if (!rows.length) {
-            listEl.innerHTML = `<div class="muted">받은 쪽지가 없습니다.</div>`;
+            listEl.innerHTML = `<div class="inbox-empty">아직 받은 쪽지가 없습니다.</div>`;
             return;
         }
 
@@ -737,18 +806,12 @@ async function loadInbox() {
                 let verifiedBadge = "";
 
                 if (!m.isAnon && m.senderVerified) {
-                    verifiedBadge = `<span style="
-        margin-left:6px;
-        padding:2px 6px;
-        border-radius:999px;
-        background:rgba(76,175,80,0.15);
-        color:#63d471;
-        font-size:11px;
-        font-weight:700;
-    ">인증</span>`;
+                    verifiedBadge = `<span class="sender-verified-badge">인증됨</span>`;
                 }
 
-                const ts = m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000).toLocaleString() : "";
+                const ts = m.createdAt?.seconds
+                    ? new Date(m.createdAt.seconds * 1000).toLocaleString("ko-KR")
+                    : "";
                 const type = m.type || "normal"; // normal / auth_question / auth_answer / handover_info ...
                 const authStatus = m.authStatus || null; // pending / accepted / rejected / null
                 const handoverStatus = m.handoverStatus || null;
@@ -800,7 +863,7 @@ async function loadInbox() {
         <div class="auth-answer-area">
             <textarea class="textarea auth-answer-text" rows="3"
                 placeholder="물건의 색깔, 특징, 안에 들어있던 물건을 자세히 적어주세요."></textarea>
-            <button class="chip btn-auth-answer-send">생김새 설명 보내기</button>
+                        <button class="chip btn-auth-answer-send">설명 보내기</button>
         </div>
     `;
                 }
@@ -809,7 +872,7 @@ async function loadInbox() {
                 let handoverActionsHtml = "";
                 if (type === "auth_answer" && authStatus === "accepted") {
                     if (handoverStatus === "done") {
-                        authStateHtml += `<span class="handover-state"> · 전달 완료</span>`;
+                        authStateHtml += `<span class="auth-state auth-state--done">전달 완료</span>`;
                     } else {
                         handoverActionsHtml = `
                             <div class="handover-actions">
@@ -821,7 +884,10 @@ async function loadInbox() {
                     }
                 }
 
-                const safeContent = (m.content || "").replace(/</g, "&lt;");
+                const safeContent = escapeHtml(m.content || "");
+                const safeTitle = escapeHtml(m.itemTitle || "제목 없음");
+                const thumbUrl = escapeHtml(m.itemThumb || "https://picsum.photos/seed/p/120/80");
+                const safeWho = escapeHtml(who);
 
                 return `
         <div class="inbox-item"
@@ -831,20 +897,27 @@ async function loadInbox() {
              data-type="${type}"
              data-title="${(m.itemTitle || "").replace(/"/g, "&quot;")}"
              data-thumb="${m.itemThumb || ""}">
-          <img src="${m.itemThumb || "https://picsum.photos/seed/p/120/80"}" alt=""
-               style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
-          <div class="content" style="flex:1">
-            <p class="title">${m.itemTitle || "제목 없음"}</p>
-            <p class="meta">
-              ${who} ${verifiedBadge} · ${ts}
+          <div class="inbox-thumb-wrap">
+            <img class="inbox-thumb" src="${thumbUrl}" alt="">
+          </div>
+          <div class="content">
+            <div class="inbox-card-head">
+              <p class="title">${safeTitle}</p>
+              <p class="inbox-time">${escapeHtml(ts)}</p>
+            </div>
+            <div class="inbox-sender-row">
+              <span class="inbox-sender">${safeWho}</span>
+              ${verifiedBadge}
+            </div>
+            <div class="inbox-status-row">
               ${typeBadgeHtml}
               ${authStateHtml}
-            </p>
-            <p>${safeContent}</p>
+            </div>
+            <p class="inbox-message">${safeContent}</p>
 
             <div class="inbox-actions">
-              <button class="chip chip--ghost btn-reply">답장</button>
-              <button class="chip" style="background:#b33;" data-role="del">삭제</button>
+              <button class="chip chip--ghost btn-reply">답장 쓰기</button>
+              <button class="chip btn-delete-message" data-role="del">삭제</button>
             </div>
 
             ${authActionsHtml}
@@ -853,8 +926,8 @@ async function loadInbox() {
           </div>
 
           <div class="inbox-reply" style="display:none;">
-            <textarea class="textarea rp-text" rows="3" placeholder="${who}에게 답장"></textarea>
-            <button class="chip rp-send">보내기</button>
+            <textarea class="textarea rp-text" rows="3" placeholder="${safeWho}에게 답장"></textarea>
+            <button class="chip rp-send">답장 보내기</button>
           </div>
         </div>`;
             })
