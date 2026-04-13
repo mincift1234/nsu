@@ -4,127 +4,19 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>글 등록 — JUP</title>
+        <link rel="manifest" href="manifest.webmanifest" />
+        <meta name="theme-color" content="#121212" />
         <link
             href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap"
             rel="stylesheet" />
         <link rel="stylesheet" href="styles.css" />
         <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
         <!-- Firebase config: register 페이지에서도 반드시 필요 -->
-
-        <!-- 이 페이지에서만 쓰는 아주 작은 보조 스타일(사이트 톤 유지) -->
-        <style>
-            .form-grid {
-                display: grid;
-                grid-template-columns: repeat(12, 1fr);
-                gap: 16px;
-            }
-            .form-row {
-                display: contents;
-            }
-            .form-field {
-                grid-column: span 6;
-            }
-            .col-12 {
-                grid-column: span 12 !important;
-            }
-            .inline {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .seg {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 6px 10px;
-                border: 1px solid var(--line-2);
-                border-radius: 10px;
-                background: var(--layer-2);
-                cursor: pointer;
-            }
-            .seg input {
-                accent-color: var(--brand-6);
-            }
-            .btn-row {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            /* 카드 폭을 히어로바와 통일(사이트 컨테이너 폭 안에서 꽉 채움) */
-            .register-card {
-                max-width: 1100px;
-                margin-inline: auto;
-            }
-
-            /* ===========================
-       모바일(폰) 전용 글 등록 레이아웃
-       =========================== */
-            @media (max-width: 768px) {
-                /* 페이지 전체 폭 줄이기 */
-                main.container {
-                    max-width: 480px;
-                    margin: 16px auto 40px;
-                    padding: 0 12px 40px;
-                }
-
-                /* 등록 카드가 화면 폭 거의 꽉 차게 */
-                .register-card {
-                    max-width: 100%;
-                    margin-inline: 0;
-                    border-radius: 16px;
-                    padding: 18px 14px 22px;
-                }
-
-                /* 한 줄에 하나씩 꽉 차게 */
-                .form-field {
-                    grid-column: span 12;
-                }
-
-                .page-heading {
-                    font-size: 20px;
-                    margin: 8px 4px 18px;
-                }
-
-                .form-grid {
-                    gap: 14px;
-                }
-
-                /* 입력창 / 셀렉트 높이 조금 키워서 손가락으로 누르기 편하게 */
-                .control {
-                    height: 44px;
-                    padding: 0 12px;
-                    font-size: 14px;
-                }
-
-                textarea.control {
-                    min-height: 120px;
-                    padding: 10px 12px;
-                    font-size: 14px;
-                }
-
-                .file-drop {
-                    height: 46px;
-                    font-size: 14px;
-                }
-
-                .btn-row {
-                    margin-top: 12px;
-                    justify-content: flex-end;
-                    gap: 8px;
-                }
-
-                .btn {
-                    height: 38px;
-                    padding: 0 14px;
-                    font-size: 14px;
-                }
-            }
-        </style>
     </head>
     <body>
         <!-- 상단 바 -->
-        <header class="topbar">
-            <div class="top-inner">
+        <header class="topbar topbar--subpage">
+            <div class="top-inner top-inner--subpage">
                 <button class="icon-btn hamburger" aria-label="메뉴 열기">
                     <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="20" height="2" rx="1" fill="#bbb" />
@@ -134,13 +26,17 @@
                 </button>
 
                 <a class="brand" href="index.html" aria-label="홈으로">
-                    <span class="brand-text" style="font-weight: 700; letter-spacing: 0.4px">JUP</span>
+                    <span class="brand-mark" aria-hidden="true">J</span>
+                    <span class="brand-copy">
+                        <span class="brand-text">JUP</span>
+                        <span class="brand-sub">post editor</span>
+                    </span>
                 </a>
 
                 <div class="search-box search-box--empty"></div>
 
                 <div id="authArea">
-                    <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
+                    <button id="loginBtn" class="chip">Google로 로그인</button>
                     <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
                     <div id="profileMenu" class="hidden" aria-hidden="true">
                         <ul>
@@ -196,110 +92,133 @@
 
         <main class="container">
             <section class="hero">
-                <p class="hero-text">사진과 기본 정보만 입력하면 등록 완료!</p>
+                <div class="hero-copy">
+                    <p class="hero-kicker">Post Editor</p>
+                    <h1 class="hero-text">분실물 글을 빠르게 등록하세요.</h1>
+                    <p class="hero-subtext">제목, 위치, 사진만 정확히 적어도 찾는 속도가 크게 올라갑니다.</p>
+                </div>
+                <div class="hero-notes">
+                    <span class="hero-note">위치는 건물명과 층수를 함께 적어주세요.</span>
+                    <span class="hero-note">식별이 쉬운 사진 한 장이면 충분합니다.</span>
+                </div>
             </section>
 
             <!-- 등록 카드 -->
             <section class="card register-card">
                 <h2 class="page-heading">글 등록</h2>
 
-                <form id="postForm" onsubmit="return false;" class="form-grid">
-                    <!-- 1행: 제목 / 카테고리 -->
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="title" class="label">제목 <span class="req">*</span></label>
-                            <input
-                                id="title"
-                                type="text"
-                                class="control"
-                                placeholder="예: 검은 지갑, 파란 우산"
-                                required />
+                <form id="postForm" onsubmit="return false;" class="form-grid register-form-layout">
+                    <section class="register-section register-section--primary">
+                        <div class="register-section-head">
+                            <h3 class="register-section-title">기본 정보</h3>
+                            <p class="register-section-text">분실물의 핵심 정보를 먼저 입력해주세요.</p>
                         </div>
 
-                        <div class="form-field">
-                            <label for="category" class="label">카테고리 <span class="req">*</span></label>
-                            <select id="category" class="control" required>
-                                <option value="">선택</option>
-                                <option>지갑</option>
-                                <option>가방</option>
-                                <option>의류</option>
-                                <option>전자기기</option>
-                                <option>문서/증명</option>
-                                <option>악세서리</option>
-                                <option>기타</option>
-                            </select>
-                        </div>
-                    </div>
+                        <div class="register-fields register-fields--two">
+                            <div class="form-field">
+                                <label for="title" class="label">제목 <span class="req">*</span></label>
+                                <input
+                                    id="title"
+                                    type="text"
+                                    class="control"
+                                    placeholder="예: 검은 지갑, 파란 우산"
+                                    required />
+                            </div>
 
-                    <!-- 2행: 위치 / 상태 -->
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="location" class="label">발견 위치</label>
-                            <input id="location" type="text" class="control" placeholder="예: 도서관 1층 안내데스크" />
-                        </div>
+                            <div class="form-field">
+                                <label for="category" class="label">카테고리 <span class="req">*</span></label>
+                                <select id="category" class="control" required>
+                                    <option value="">선택</option>
+                                    <option>지갑</option>
+                                    <option>가방</option>
+                                    <option>의류</option>
+                                    <option>전자기기</option>
+                                    <option>문서/증명</option>
+                                    <option>악세서리</option>
+                                    <option>기타</option>
+                                </select>
+                            </div>
 
-                        <div class="form-field">
-                            <label for="status" class="label">상태 <span class="req">*</span></label>
-                            <select id="status" class="control" required>
-                                <option value="">선택</option>
-                                <option value="보관중">보관중</option>
-                                <option value="찾는중">찾는중</option>
-                                <option value="완료">완료</option>
-                            </select>
-                        </div>
-                    </div>
+                            <div class="form-field">
+                                <label for="location" class="label">발견 위치</label>
+                                <input id="location" type="text" class="control" placeholder="예: 도서관 1층 안내데스크" />
+                            </div>
 
-                    <!-- 3행: 날짜(습득/분실 토글 + 단일 날짜) -->
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label class="label">날짜 <span class="req">*</span></label>
-                            <div class="inline">
-                                <label class="seg">
-                                    <input type="radio" name="dateType" value="found" checked />
-                                    <span>습득</span>
-                                </label>
-                                <label class="seg">
-                                    <input type="radio" name="dateType" value="lost" />
-                                    <span>분실</span>
-                                </label>
-                                <input id="date" type="date" class="control" required />
+                            <div class="form-field">
+                                <label for="status" class="label">상태 <span class="req">*</span></label>
+                                <select id="status" class="control" required>
+                                    <option value="">선택</option>
+                                    <option value="보관중">보관중</option>
+                                    <option value="찾는중">찾는중</option>
+                                    <option value="완료">완료</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="form-field"><!-- 레이아웃 균형용 빈 칸 --></div>
-                    </div>
+                    </section>
 
-                    <!-- 4행: 설명 -->
-                    <div class="form-row">
-                        <div class="form-field col-12">
-                            <label for="description" class="label">설명 <span class="req">*</span></label>
-                            <textarea
-                                id="description"
-                                rows="4"
-                                class="control"
-                                placeholder="특징, 위치, 픽업 방법 등"
-                                required></textarea>
+                    <section class="register-section register-section--secondary">
+                        <div class="register-section-head">
+                            <h3 class="register-section-title">상세 설명</h3>
+                            <p class="register-section-text">날짜와 특징을 적으면 찾는 사람이 더 빨리 알아볼 수 있습니다.</p>
                         </div>
-                    </div>
 
-                    <!-- 5행: 사진 업로드 -->
-                    <div class="form-row">
-                        <div class="form-field col-12">
-                            <label class="label">사진 업로드 <span class="req">*</span></label>
-                            <label class="file-drop" for="imageInput">이미지 선택 또는 드래그</label>
-                            <input id="imageInput" name="image" type="file" accept="image/*" hidden />
-                            <div id="preview" class="preview"></div>
+                        <div class="register-fields">
+                            <div class="form-field">
+                                <label class="label">날짜 <span class="req">*</span></label>
+                                <div class="date-field">
+                                    <div class="date-type-group">
+                                        <label class="seg">
+                                            <input type="radio" name="dateType" value="found" checked />
+                                            <span>습득</span>
+                                        </label>
+                                        <label class="seg">
+                                            <input type="radio" name="dateType" value="lost" />
+                                            <span>분실</span>
+                                        </label>
+                                    </div>
+                                    <input id="date" type="date" class="control date-input" required />
+                                </div>
+                            </div>
 
-                            <label class="toggle-box">
-                                <input type="checkbox" id="mosaicToggle" />
-                                <span>사진에 모자이크 적용</span>
-                            </label>
+                            <div class="form-field">
+                                <label for="description" class="label">설명 <span class="req">*</span></label>
+                                <textarea
+                                    id="description"
+                                    rows="5"
+                                    class="control"
+                                    placeholder="특징, 위치, 픽업 방법 등"
+                                    required></textarea>
+                            </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="btn-row">
-                        <button id="submitBtn" class="btn primary" type="submit">등록</button>
-                        <a class="btn" href="index.html">취소</a>
+                    <section class="register-section register-section--media">
+                        <div class="register-section-head">
+                            <h3 class="register-section-title">사진 업로드</h3>
+                            <p class="register-section-text">정면 사진 한 장과 특징이 잘 보이는 사진이 가장 효과적입니다.</p>
+                        </div>
+
+                        <div class="register-fields">
+                            <div class="form-field col-12">
+                                <label class="label">사진 업로드 <span class="req">*</span></label>
+                                <label class="file-drop" for="imageInput">이미지 선택 또는 드래그</label>
+                                <input id="imageInput" name="image" type="file" accept="image/*" hidden />
+                                <div id="preview" class="preview"></div>
+
+                                <label class="toggle-box">
+                                    <input type="checkbox" id="mosaicToggle" />
+                                    <span>사진에 모자이크 적용</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="register-actions">
                         <span id="msg" class="hint"></span>
+                        <div class="btn-row">
+                            <a class="btn" href="index.html">등록 취소</a>
+                            <button id="submitBtn" class="btn primary" type="submit">게시글 등록</button>
+                        </div>
                     </div>
                 </form>
             </section>
@@ -307,5 +226,19 @@
 
         <script type="module" src="register.js"></script>
         <script src="mobile-menu.js"></script>
+        <script>
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", function () {
+                    navigator.serviceWorker
+                        .register("/sw.js")
+                        .then(function (reg) {
+                            console.log("Service Worker 등록 성공:", reg.scope);
+                        })
+                        .catch(function (err) {
+                            console.error("Service Worker 등록 실패:", err);
+                        });
+                });
+            }
+        </script>
     </body>
 </html>
