@@ -30,7 +30,8 @@
     }
 
     /* 햄버거 버튼은 모바일에서만 보이게 */
-    .hamburger {
+    .hamburger,
+    .icon-btn.hamburger {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -173,12 +174,142 @@
         padding: 0 12px 40px;
     }
 
+    .hero {
+        padding: 16px 14px;
+        border-radius: 16px;
+        gap: 12px;
+    }
+
+    .hero-text {
+        font-size: 22px;
+    }
+
+    .hero-subtext {
+        font-size: 13px;
+        margin-top: 8px;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .hero-stat {
+        padding: 10px 10px 11px;
+        border-radius: 12px;
+    }
+
+    .hero-stat-value {
+        font-size: 18px;
+    }
+
+    .hero-notes {
+        gap: 6px;
+    }
+
+    .hero-note {
+        min-height: 30px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
+    /* 모바일 목록 카드는 1열로 보여줘야 폭이 넓어져 덜 길쭉해 보임 */
+    .listings {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .card {
+        border-radius: 14px;
+    }
+
+    .card .thumb,
+    .thumb {
+        height: 168px;
+    }
+
+    .card-body {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .card-topline {
+        gap: 10px;
+    }
+
+    .title {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    .card-summary {
+        -webkit-line-clamp: 1;
+        min-height: auto;
+        font-size: 12px;
+    }
+
+    .card-tags {
+        gap: 5px;
+    }
+
+    .card-tag {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .card-meta {
+        font-size: 12px;
+    }
+
+    .list-section-header {
+        margin: 14px 0 6px;
+        padding-top: 4px;
+    }
+
+    .topbar--home .header-actions {
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .modal-meta {
+        gap: 6px;
+    }
+
+    .modal-meta-chip {
+        min-height: 30px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
     /* 글 등록 카드가 화면에 꽉 차게 */
     .register-card {
         width: 100%;
         max-width: none;
         padding: 16px 14px 18px;
         border-radius: 14px;
+    }
+
+    .register-form-layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .register-section {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .register-fields--two {
+        grid-template-columns: 1fr;
+    }
+
+    .date-field {
+        gap: 10px;
+    }
+
+    .date-input {
+        max-width: none;
     }
 
     /* 제목 "글 등록" 사이즈 살짝 키우기 */
@@ -226,6 +357,18 @@
     .btn-row {
         justify-content: flex-end;
         margin-top: 10px;
+    }
+
+    .register-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .register-actions .btn-row {
+        justify-content: stretch;
+        flex-direction: column-reverse;
+        width: 100%;
     }
 
     .btn {
