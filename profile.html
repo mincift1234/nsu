@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="top-inner">
+    <header class="topbar topbar--subpage">
+      <div class="top-inner top-inner--subpage">
         <!-- 햄버거 -->
         <button class="icon-btn hamburger" aria-label="메뉴 열기">
           <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,7 +23,11 @@
 
         <!-- 브랜드 -->
         <a class="brand" href="index.html" aria-label="홈으로 이동">
-          <span class="brand-text">JUP</span>
+          <span class="brand-mark" aria-hidden="true">J</span>
+          <span class="brand-copy">
+            <span class="brand-text">JUP</span>
+            <span class="brand-sub">account center</span>
+          </span>
         </a>
 
         <!-- 검색창 대신 ‘빈 자리’만 두는 박스 (눈에는 안 보이는 여백) -->
@@ -31,7 +35,7 @@
 
         <!-- 로그인 / 프로필 영역 -->
         <div id="authArea">
-          <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
+          <button id="loginBtn" class="chip">Google로 로그인</button>
           <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
           <div id="profileMenu" class="hidden" aria-hidden="true">
             <ul>
@@ -70,7 +74,9 @@
     </div>
 
     <main class="main-content">
+      <p class="profile-kicker">Account</p>
       <h2 class="page-title profile-title">내 정보</h2>
+      <p class="profile-subtitle">계정 정보와 프로필 사진을 한 곳에서 관리할 수 있습니다.</p>
 
       <div class="profile-wrapper">
         <article class="profile-card" id="profileCard" aria-label="프로필 카드">
@@ -115,8 +121,8 @@
 
           <!-- 저장 / 탈퇴 -->
           <div class="profile-actions">
-            <button id="saveNameBtn" class="btn btn-save">저장</button>
-            <button id="deleteAccountBtn" class="btn btn-delete">회원 탈퇴</button>
+            <button id="saveNameBtn" class="btn btn-save">프로필 저장</button>
+            <button id="deleteAccountBtn" class="btn btn-delete">계정 삭제</button>
           </div>
         </article>
 
