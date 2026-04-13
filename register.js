@@ -335,7 +335,7 @@ async function loadForEdit(id) {
         // 라벨 변경
         const h2 = document.querySelector(".page-heading");
         if (h2) h2.textContent = "글 수정";
-        if (submitBtn) submitBtn.textContent = "수정 저장";
+        if (submitBtn) submitBtn.textContent = "변경 저장";
     } catch (err) {
         console.error(err);
         alert("수정 데이터를 불러오지 못했습니다.");
