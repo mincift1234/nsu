@@ -4,6 +4,8 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>분실물 찾기 — 다크 테마</title>
+        <link rel="manifest" href="manifest.webmanifest" />
+        <meta name="theme-color" content="#121212" />
         <link
             href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap"
             rel="stylesheet" />
@@ -11,22 +13,28 @@
         <link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
     </head>
     <body>
-        <header class="topbar">
-            <div class="top-inner">
-                <button class="icon-btn hamburger" aria-label="메뉴 열기">
+        <header class="topbar topbar--home">
+            <div class="top-inner top-inner--home">
+                <div class="header-start">
+                    <button class="icon-btn hamburger" aria-label="메뉴 열기">
                     <!-- 햄버거 아이콘 -->
                     <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="20" height="2" rx="1" fill="#bbb" />
                         <rect y="6" width="20" height="2" rx="1" fill="#bbb" />
                         <rect y="12" width="20" height="2" rx="1" fill="#bbb" />
                     </svg>
-                </button>
+                    </button>
 
-                <a class="brand" href="index.html" aria-label="홈으로 이동">
-                    <span class="brand-text">JUP</span>
-                </a>
+                    <a class="brand" href="index.html" aria-label="홈으로 이동">
+                        <span class="brand-mark" aria-hidden="true">J</span>
+                        <span class="brand-copy">
+                            <span class="brand-text">JUP</span>
+                            <span class="brand-sub">campus lost and found</span>
+                        </span>
+                    </a>
+                </div>
 
-                <div class="search-box" role="search" aria-label="검색">
+                <div class="search-box search-box--home" role="search" aria-label="검색">
                     <form class="search-form" id="searchForm" action="#" onsubmit="return false;">
                         <input
                             id="searchInput"
@@ -47,50 +55,53 @@
                     </form>
                 </div>
 
-                <div id="authArea" aria-hidden="false">
-                    <button id="loginBtn" class="chip" style="border-radius: 999px">Google 로그인</button>
-                    <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
-                    <div id="profileMenu" class="hidden" aria-hidden="true">
-                        <ul>
-                            <li id="profile-info"><a href="profile.html">내 정보</a></li>
-                            <li id="profile-logout">로그아웃</li>
-                        </ul>
+                <div class="header-actions">
+                    <div id="authArea" aria-hidden="false">
+                        <button id="loginBtn" class="chip">Google로 로그인</button>
+                        <img id="userAvatar" alt="프로필" referrerpolicy="no-referrer" style="display: none" />
+                        <div id="profileMenu" class="hidden" aria-hidden="true">
+                            <ul>
+                                <li id="profile-info"><a href="profile.html">내 정보</a></li>
+                                <li id="profile-logout">로그아웃</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions" aria-label="빠른 메뉴">
+                        <button id="addBtn" class="add-btn quick-action-btn" aria-label="등록" title="등록">
+                            <svg
+                                viewBox="0 0 24 24"
+                                width="20"
+                                height="20"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"></path>
+                                <path
+                                    d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
+                            </svg>
+                        </button>
+
+                        <button id="inboxBtn" class="add-btn quick-action-btn" aria-label="쪽지함" title="쪽지함">
+                            <svg
+                                viewBox="0 0 24 24"
+                                width="20"
+                                height="20"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M4 4h16v12H4z"></path>
+                                <path d="M22 20H2a2 2 0 0 1-2-2V6"></path>
+                                <path d="M22 6l-10 7L2 6"></path>
+                            </svg>
+                            <span id="inboxBadge" class="badge" style="display: none">0</span>
+                        </button>
                     </div>
                 </div>
-
-                <button id="addBtn" class="add-btn" aria-label="등록" title="등록">
-                    <svg
-                        viewBox="0 0 24 24"
-                        width="20"
-                        height="20"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"></path>
-                        <path
-                            d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
-                    </svg>
-                </button>
-
-                <!-- 쪽지 확인 아이콘: 등록 버튼 오른쪽, 동일 사이즈(44x44) -->
-                <button id="inboxBtn" class="add-btn" aria-label="쪽지함" title="쪽지함" style="margin-left: 8px">
-                    <svg
-                        viewBox="0 0 24 24"
-                        width="20"
-                        height="20"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M4 4h16v12H4z"></path>
-                        <path d="M22 20H2a2 2 0 0 1-2-2V6"></path>
-                        <path d="M22 6l-10 7L2 6"></path>
-                    </svg>
-                    <span id="inboxBadge" class="badge" style="display: none">0</span>
-                </button>
             </div>
         </header>
 
@@ -135,7 +146,25 @@
 
         <main class="container">
             <section class="hero">
-                <p class="hero-text">학교 분실물, 빠르게 찾아드려요 — 사진과 위치만 등록해주세요.</p>
+                <div class="hero-copy">
+                    <p class="hero-kicker">JUP 분실물 게시판</p>
+                    <h1 class="hero-text">학교 분실물, 빠르게 찾아드려요.</h1>
+                    <p class="hero-subtext">사진과 위치만 등록하면 학생들이 더 빨리 확인할 수 있습니다.</p>
+                </div>
+                <div class="hero-stats" aria-label="게시판 요약">
+                    <div class="hero-stat">
+                        <span class="hero-stat-label">전체 글</span>
+                        <strong id="heroTotal" class="hero-stat-value">0</strong>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-label">보관중</span>
+                        <strong id="heroHolding" class="hero-stat-value">0</strong>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-label">찾는중</span>
+                        <strong id="heroFinding" class="hero-stat-value">0</strong>
+                    </div>
+                </div>
             </section>
 
             <section class="listings" aria-label="분실물 목록" id="listings">
@@ -151,7 +180,7 @@
                 <div class="modal-body">
                     <figure class="modal-thumb"><img id="mImg" alt="" /></figure>
                     <h3 id="mTitle" class="modal-title"></h3>
-                    <p id="mMeta" class="modal-meta"></p>
+                    <div id="mMeta" class="modal-meta"></div>
                     <p id="mDesc" class="modal-desc"></p>
 
                     <div id="ownerActions" class="owner-actions" style="display: none">
@@ -184,7 +213,7 @@
 
                         <!-- 보내기 버튼은 맨 아래, 우측 정렬 -->
                         <div class="msg-actions">
-                            <button id="msgSend" class="chip">보내기</button>
+                            <button id="msgSend" class="chip">쪽지 보내기</button>
                         </div>
                     </div>
                 </div>
@@ -194,10 +223,13 @@
         <!-- 쪽지함 모달 -->
         <div id="inboxModal" class="modal" aria-hidden="true" style="display: none">
             <div class="modal-backdrop"></div>
-            <div class="modal-panel" style="max-width: 720px">
+            <div class="modal-panel inbox-modal-panel">
                 <button class="modal-close" aria-label="닫기">×</button>
                 <div class="modal-body">
-                    <h3 class="modal-title">쪽지함</h3>
+                    <div class="inbox-modal-head">
+                        <h3 class="modal-title">쪽지함</h3>
+                        <p class="inbox-modal-subtitle">인증 요청, 답장, 전달 안내를 한 곳에서 확인할 수 있습니다.</p>
+                    </div>
                     <div id="inboxList" class="inbox-list"></div>
                 </div>
             </div>
@@ -208,5 +240,19 @@
         <!-- 기존 스크립트 유지 (로그인/데이터 로직) -->
         <script type="module" src="script.js"></script>
         <script src="mobile-menu.js"></script>
+        <script>
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", function () {
+                    navigator.serviceWorker
+                        .register("/sw.js")
+                        .then(function (reg) {
+                            console.log("Service Worker 등록 성공:", reg.scope);
+                        })
+                        .catch(function (err) {
+                            console.error("Service Worker 등록 실패:", err);
+                        });
+                });
+            }
+        </script>
     </body>
 </html>
