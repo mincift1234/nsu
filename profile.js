@@ -60,6 +60,18 @@ function pick(...selectors) {
     return null;
 }
 
+function formatKoreanDateTime(value) {
+    if (!value) return "-";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return new Intl.DateTimeFormat("ko-KR", {
+        dateStyle: "long",
+        timeStyle: "short",
+        timeZone: "Asia/Seoul"
+    }).format(date);
+}
+
 let currentUser = null;
 const DEFAULT_PHOTO = "https://via.placeholder.com/160?text=USER";
 let ORIGINAL_PHOTO_URL = null;
@@ -143,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (profilePhoto) profilePhoto.src = currentPhoto;
         if (displayNameInput) displayNameInput.value = user.displayName || "";
         if (userEmailEl) userEmailEl.textContent = user.email || "-";
-        if (createdAtEl) createdAtEl.textContent = user.metadata?.creationTime || "-";
+        if (createdAtEl) createdAtEl.textContent = formatKoreanDateTime(user.metadata?.creationTime);
         if (displayNameInput) {
             displayNameInput.value = user.displayName || "";
 
@@ -211,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("저장 실패: " + (e.message || e));
             } finally {
                 saveNameBtn.disabled = false;
-                saveNameBtn.textContent = "저장";
+                saveNameBtn.textContent = "프로필 저장";
             }
         });
     }
