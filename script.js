@@ -53,8 +53,8 @@ async function registerFcmToken(user) {
             return;
         }
 
-        // 2) 메신저용 서비스워커 등록 (루트 경로에 있는 파일)
-        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        // 2) 설치/PWA/푸시를 같은 서비스워커로 처리
+        const registration = await navigator.serviceWorker.register("/sw.js");
         console.log("서비스워커 등록 완료:", registration);
 
         // 3) 알림 권한 요청
