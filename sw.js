@@ -1,6 +1,21 @@
 // sw.js
 
-const CACHE_NAME = "jup-cache-v1";
+importScripts("https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js");
+
+const CACHE_NAME = "jup-cache-v2";
+const firebaseConfig = {
+    apiKey: "AIzaSyCpE_MfBizTqyY2v_cQOrBX4q6KhIi5mrk",
+    authDomain: "something-e578a.firebaseapp.com",
+    projectId: "something-e578a",
+    storageBucket: "something-e578a.firebasestorage.app",
+    messagingSenderId: "879471143827",
+    appId: "1:879471143827:web:33e2c1001e051f05265666",
+    measurementId: "G-RHRK7NJ1FN"
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
 
 // 오프라인용으로 캐시해둘 파일 목록 (필요하면 추가/수정)
 const APP_SHELL = [
@@ -77,4 +92,12 @@ self.addEventListener("fetch", (event) => {
             });
         })
     );
+});
+
+messaging.onBackgroundMessage((payload) => {
+    const { title, body } = payload.notification || {};
+    self.registration.showNotification(title || "새 알림", {
+        body: body || "",
+        icon: "/icons/icon-192.png"
+    });
 });
